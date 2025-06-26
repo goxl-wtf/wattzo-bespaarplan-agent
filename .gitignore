@@ -156,8 +156,10 @@ test_*.py
 .DS_Store
 Thumbs.db
 
-# Claude artifacts
-.claude/
+# Claude artifacts (except prompts)
+.claude/settings.local.json
+.claude/journal/
+.claude/scripts/
 
 # Keep example files
 !.env.local.example
