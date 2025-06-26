@@ -141,7 +141,8 @@ cython_debug/
 
 # MCP outputs
 mcp-servers/template-provider/outputs/
-*.html
+bespaarplan_*.html
+!mcp-servers/template-provider/templates/*.html
 
 # Test files
 test_*.py
