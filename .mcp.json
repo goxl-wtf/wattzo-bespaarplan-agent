@@ -1,0 +1,51 @@
+{
+  "mcpServers": {
+    "supabase": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@supabase/mcp-server-supabase@latest",
+        "--access-token",
+        "sbp_2575d3a8553fd63085bf62fff556ab6e4c7a10b1"
+      ],
+      "env": {}
+    },
+    "energy-data": {
+      "type": "stdio",
+      "command": "python3",
+      "args": [
+        "mcp-servers/energy-data/server.py"
+      ],
+      "env": {
+        "PYTHONPATH": ".",
+        "DEMO_MODE": "false",
+        "SUPABASE_URL": "https://dlxxgvpebaeqmmqdiqtp.supabase.co",
+        "SUPABASE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRseHhndnBlYmFlcW1tcWRpcXRwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0Mzg3MjMzMiwiZXhwIjoyMDU5NDQ4MzMyfQ.73Hk_UQRvH08LSh6YlsFgtHnZkh0tA3X23wCuJCGrG0"
+      }
+    },
+    "calculation-engine": {
+      "type": "stdio",
+      "command": "python3",
+      "args": [
+        "mcp-servers/calculation-engine/server.py"
+      ],
+      "env": {
+        "PYTHONPATH": ".",
+        "DEMO_MODE": "false",
+        "SUPABASE_URL": "https://dlxxgvpebaeqmmqdiqtp.supabase.co",
+        "SUPABASE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRseHhndnBlYmFlcW1tcWRpcXRwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0Mzg3MjMzMiwiZXhwIjoyMDU5NDQ4MzMyfQ.73Hk_UQRvH08LSh6YlsFgtHnZkh0tA3X23wCuJCGrG0"
+      }
+    },
+    "template-provider": {
+      "type": "stdio",
+      "command": "python3",
+      "args": [
+        "mcp-servers/template-provider/server.py"
+      ],
+      "env": {
+        "PYTHONPATH": "."
+      }
+    }
+  }
+}
