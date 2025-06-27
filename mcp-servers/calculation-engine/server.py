@@ -1169,7 +1169,8 @@ def calculate_comprehensive_metrics_impl(
     deal_id: str,
     energy_profile: Dict[str, Any],
     products: List[Dict[str, Any]],
-    loan_terms: Optional[Dict[str, Any]] = None
+    loan_terms: Optional[Dict[str, Any]] = None,
+    skip_db_lookup: bool = False
 ) -> Dict[str, Any]:
     """
     Calculate ALL metrics needed for the report in one comprehensive call.
@@ -1182,8 +1183,8 @@ def calculate_comprehensive_metrics_impl(
     if 'error' in basic_savings:
         return basic_savings
     
-    # For non-demo mode, fetch actual database values
-    if not DEMO_MODE and supabase:
+    # For non-demo mode, fetch actual database values (unless skipped)
+    if not DEMO_MODE and supabase and not skip_db_lookup:
         try:
             # Get quote data with actual values
             deal_response = supabase.table('deals') \
@@ -1215,13 +1216,13 @@ def calculate_comprehensive_metrics_impl(
                     if quote_data.get('total_subsidy_estimate') is not None:
                         basic_savings['financial_impact']['total_subsidies'] = float(quote_data['total_subsidy_estimate'])
                     
-                    if quote_data.get('loan_monthly_payment') is not None:
-                        # Override loan terms with actual database values
-                        loan_terms = {
+                    if quote_data.get('loan_monthly_payment') is not None and loan_terms:
+                        # Update loan terms with actual database values, preserving other fields
+                        loan_terms.update({
                             'interest_rate': float(quote_data.get('loan_interest_rate', 0)) / 100,  # Convert to decimal
-                            'term_years': quote_data.get('loan_term_years', 10),
+                            'term_years': quote_data.get('loan_term_years', loan_terms.get('term_years', 15)),
                             'monthly_payment': float(quote_data.get('loan_monthly_payment', 0))
-                        }
+                        })
                     
                     # Update products with actual subsidy values
                     if quote_items_response.data:
@@ -1395,14 +1396,19 @@ def calculate_comprehensive_metrics_impl(
         # Subsidy is used to pay down the loan immediately
         effective_loan_amount = net_investment  # After subsidy payment
         
-        # Calculate monthly payment based on effective loan (after subsidy paydown)
-        if interest_rate > 0:
-            monthly_rate = interest_rate / 12
-            n_payments = term_years * 12
-            monthly_payment = effective_loan_amount * (monthly_rate * (1 + monthly_rate)**n_payments) / ((1 + monthly_rate)**n_payments - 1)
+        # Use pre-calculated monthly payment from database if available
+        if loan_terms.get('monthly_payment', 0) > 0:
+            # Trust the database calculation (from closer's assessment)
+            monthly_payment = loan_terms['monthly_payment']
         else:
-            # 0% interest - simple division
-            monthly_payment = effective_loan_amount / (term_years * 12)
+            # Fallback: Calculate monthly payment based on effective loan (after subsidy paydown)
+            if interest_rate > 0:
+                monthly_rate = interest_rate / 12
+                n_payments = term_years * 12
+                monthly_payment = effective_loan_amount * (monthly_rate * (1 + monthly_rate)**n_payments) / ((1 + monthly_rate)**n_payments - 1)
+            else:
+                # 0% interest - simple division
+                monthly_payment = effective_loan_amount / (term_years * 12)
         
         # Calculate total interest paid over loan term (on the effective amount)
         total_payments = monthly_payment * term_years * 12
@@ -1579,18 +1585,19 @@ def calculate_from_comprehensive_data(comprehensive_data: Dict[str, Any]) -> Dic
         
         loan_terms = {
             'amount': comprehensive_data['quote']['totals']['net_investment'],
-            'interest_rate': loan_info.get('interest_rate', 0) / 100 if loan_info.get('interest_rate', 0) > 0 else 0,  # Default to 0% if not specified
-            'duration_years': loan_info.get('term_years', 15),  # Default 15 years
+            'interest_rate': loan_info.get('interest_rate', 0),  # Keep as-is from database (already decimal)
+            'term_years': loan_info.get('term_years', 15),  # Default 15 years
             'monthly_payment': loan_info.get('monthly_payment', 0),  # Use pre-calculated if available
-            'income_category': loan_info.get('income_category', '<60k')
+            'income_category': loan_info.get('income_category', '>=60k')  # Default to higher income if not specified
         }
     
-    # Calculate comprehensive metrics
+    # Calculate comprehensive metrics (skip DB lookup since we have all data)
     return calculate_comprehensive_metrics_impl(
         deal_id=deal_id,
         energy_profile=energy_profile,
         products=products,
-        loan_terms=loan_terms
+        loan_terms=loan_terms,
+        skip_db_lookup=True  # We already have all data from comprehensive_data
     )
 
 

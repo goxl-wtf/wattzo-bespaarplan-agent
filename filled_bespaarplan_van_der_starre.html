@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bespaarplan - {{ customer_name }} | WattZo</title>
+    <title>Bespaarplan - Mevrouw Van der starre | WattZo</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -1543,7 +1543,7 @@
         }
     </style>
 </head>
-<body class="{{ customer_emphasis_class }}">
+<body class="emphasis-savings">
     <!-- Hero Section -->
     <div class="hero">
         <div class="hero-content">
@@ -1553,15 +1553,15 @@
             
             <div class="hero-info">
                 <div class="hero-info-item">
-                    <span class="value">€{{ annual_savings|round(0)|int }}</span>
+                    <span class="value">€1.704</span>
                     <span class="label">Jaarlijkse Besparing</span>
                 </div>
                 <div class="hero-info-item">
-                    <span class="value">{{ co2_reduction_pct }}%</span>
+                    <span class="value">27%</span>
                     <span class="label">CO₂ Reductie</span>
                 </div>
                 <div class="hero-info-item">
-                    <span class="value">€{{ property_value_increase|round(0)|int }}</span>
+                    <span class="value">€27.200</span>
                     <span class="label">Waardestijging</span>
                 </div>
             </div>
@@ -1584,26 +1584,26 @@
         
         <section class="intro-section">
             <div class="intro-content">
-                <h2>Beste {{ customer_salutation }} {{ customer_lastname }},</h2>
+                <h2>Beste Mevrouw Van der starre,</h2>
                 <div class="intro-box">
-                    <p>Naar aanleiding van uw gesprek met onze adviseur {{ advisor_name }} hebben we een persoonlijk bespaarplan voor u opgesteld.</p>
+                    <p>Naar aanleiding van uw gesprek met onze adviseur Sarah Janssen hebben we een persoonlijk bespaarplan voor u opgesteld.</p>
                     <p>We hebben zorgvuldig gekeken naar uw woning, uw wensen en de beste oplossingen voor uw situatie.</p>
-                    <p><strong>Het resultaat: een plan waarmee u direct €{{ monthly_savings|round(0)|int }} per maand bespaart én uw woning €{{ property_value_increase|round(0)|int }} meer waard wordt!</strong></p>
+                    <p><strong>Het resultaat: een plan waarmee u direct €142 per maand bespaart én uw woning €27.200 meer waard wordt!</strong></p>
                 </div>
                 
                 <h3>Wat u belangrijk vindt:</h3>
                 <ul class="wishes-list">
-                    {% for wish in customer_wishes %}
-                    <li>{{ wish }}</li>
-                    {% endfor %}
+                    <li>Energiekosten verlagen</li>
+                    <li>Comfortabeler wonen</li>
+                    <li>Waarde van de woning verhogen</li>
                 </ul>
             </div>
             
             <div class="intro-image">
                 <img src="https://dlxxgvpebaeqmmqdiqtp.supabase.co/storage/v1/object/public/website-images//young-woman-in-jungle-holding-paper-model-of-house.webp" alt="Duurzaam wonen">
                 <div class="intro-image-overlay">
-                    <h3>{{ property_address }}</h3>
-                    <p>{{ property_city }} • {{ property_size }} m² • Bouwjaar {{ property_year }}</p>
+                    <h3>Jaarsveldstraat 203</h3>
+                    <p>'s-Gravenhage • 102 m² • Bouwjaar 1950</p>
                 </div>
             </div>
         </section>
@@ -1618,15 +1618,15 @@
                 <h3 style="text-align: center; font-size: 2rem; margin-bottom: 40px; font-weight: 300;">Uw Huidige Energieverbruik</h3>
                 <div class="metrics-grid">
                     <div class="metric-card">
-                        <div class="metric-value">{{ gas_usage_current }} <span class="unit">m³</span></div>
+                        <div class="metric-value">1.721 <span class="unit">m³</span></div>
                         <div class="metric-label">Gasverbruik per jaar</div>
                     </div>
                     <div class="metric-card">
-                        <div class="metric-value">{{ electricity_usage_current }} <span class="unit">kWh</span></div>
+                        <div class="metric-value">3.059 <span class="unit">kWh</span></div>
                         <div class="metric-label">Stroomverbruik per jaar</div>
                     </div>
                     <div class="metric-card">
-                        <div class="metric-value">€{{ current_energy_costs|round(0)|int }}</div>
+                        <div class="metric-value">€2.877</div>
                         <div class="metric-label">Totale energiekosten</div>
                     </div>
                 </div>
@@ -1645,44 +1645,42 @@
                 <tbody>
                     <tr>
                         <td>Gasverbruik</td>
-                        <td>{{ gas_usage_current }} m³</td>
-                        <td>{{ gas_usage_after }} m³</td>
-                        <td style="color: #48bb78; font-weight: bold;">-{{ gas_savings_pct }}%</td>
+                        <td>1.721 m³</td>
+                        <td>516 m³</td>
+                        <td style="color: #48bb78; font-weight: bold;">-70%</td>
                     </tr>
                     <tr>
                         <td>Stroomverbruik (bruto)</td>
-                        <td>{{ electricity_usage_current }} kWh</td>
-                        <td>{{ electricity_usage_gross_after }} kWh</td>
-                        <td style="color: {% if electricity_usage_gross_after > electricity_usage_current %}#e53e3e{% else %}#48bb78{% endif %};">{% if electricity_usage_gross_after > electricity_usage_current %}+{% endif %}{{ electricity_usage_gross_after - electricity_usage_current }} kWh</td>
+                        <td>3.059 kWh</td>
+                        <td>4.259 kWh</td>
+                        <td style="color: #e53e3e;">+1.200 kWh</td>
                     </tr>
-                    {% if solar_production > 0 %}
                     <tr>
                         <td>Zonne-energie productie</td>
                         <td>0 kWh</td>
-                        <td>{{ solar_production }} kWh</td>
-                        <td style="color: #48bb78; font-weight: bold;">+{{ solar_production }} kWh</td>
+                        <td>3.380 kWh</td>
+                        <td style="color: #48bb78; font-weight: bold;">+3.380 kWh</td>
                     </tr>
                     <tr style="background: #f0fdf4;">
                         <td><strong>Netto stroomverbruik</strong></td>
-                        <td><strong>{{ electricity_usage_current }} kWh</strong></td>
-                        <td><strong>{{ electricity_usage_net_after }} kWh</strong></td>
-                        <td style="color: #48bb78; font-weight: bold;"><strong>-{{ electricity_savings_pct }}%</strong></td>
+                        <td><strong>3.059 kWh</strong></td>
+                        <td><strong>879 kWh</strong></td>
+                        <td style="color: #48bb78; font-weight: bold;"><strong>-71%</strong></td>
                     </tr>
-                    {% endif %}
                     <tr class="highlight-row">
                         <td>Jaarlijkse energiekosten</td>
-                        <td>€{{ current_energy_costs|round(0)|int }}</td>
-                        <td>€{{ energy_costs_after|round(0)|int }}</td>
-                        <td style="color: #48bb78; font-weight: bold;">-€{{ annual_savings|round(0)|int }}</td>
+                        <td>€2.877</td>
+                        <td>€1.173</td>
+                        <td style="color: #48bb78; font-weight: bold;">-€1.704</td>
                     </tr>
                 </tbody>
             </table>
 
             <div class="label-improvement">
-                <div class="label-badge label-{{ energy_label_current|lower }}">
+                <div class="label-badge label-d">
                     <div class="house-roof"></div>
                     <div class="house-body">
-                        <span class="label-letter">{{ energy_label_current }}</span>
+                        <span class="label-letter">D</span>
                     </div>
                     <div class="efficiency-indicator"></div>
                 </div>
@@ -1690,10 +1688,10 @@
                     <div class="arrow-path"></div>
                     <div class="arrow-head"></div>
                 </div>
-                <div class="label-badge label-{{ energy_label_after|lower }}">
+                <div class="label-badge label-b">
                     <div class="house-roof"></div>
                     <div class="house-body">
-                        <span class="label-letter">{{ energy_label_after }}</span>
+                        <span class="label-letter">B</span>
                     </div>
                     <div class="efficiency-indicator"></div>
                 </div>
@@ -1702,7 +1700,11 @@
             <!-- Energy Situation Narrative -->
             <div class="narrative-section" style="margin-top: 60px; padding: 40px; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-radius: 20px; border-left: 5px solid #2c5282;">
                 <p style="font-size: 1.3rem; line-height: 1.8; color: #2d3748; margin: 0; white-space: pre-line;">
-                    {{ energy_situation_narrative }}
+                    Uw rijtjeswoning uit 1950 verbruikt momenteel 1.721 m³ gas per jaar, wat bovengemiddeld is voor een woning van 102 m². Dit komt door het gebrek aan moderne isolatie en een verouderd verwarmingssysteem, typisch voor woningen uit deze periode.
+
+                    Door de installatie van een hybride warmtepomp en 10 zonnepanelen transformeert uw energiesituatie volledig. Uw gasverbruik daalt met maar liefst 70% naar slechts 516 m³ per jaar. De warmtepomp neemt het grootste deel van de verwarmingsbehoefte over, terwijl uw cv-ketel alleen nog bijspringt tijdens extreem koude dagen.
+
+                    De 10 zonnepanelen produceren jaarlijks 3.380 kWh schone energie, waardoor uw netto stroomverbruik met 71% daalt. U wordt grotendeels zelfvoorzienend en minder afhankelijk van stijgende energieprijzen. Deze combinatie van maatregelen verbetert uw energielabel van D naar B - een prestatie waar u trots op mag zijn.
                 </p>
             </div>
         </section>
@@ -1719,30 +1721,34 @@
                     <p style="font-size: 1.2rem; color: #666; margin-bottom: 40px;">Een slimme combinatie van bewezen technologieën voor maximale besparing</p>
                     
                     <div class="package-items">
-                        {% for product in products %}
                         <div class="package-item">
-                            <h4>{{ product.name }}</h4>
-                            <p style="color: #666; margin: 10px 0;">{{ product.description }}</p>
-                            <strong>€{{ product.cost|round(0)|int }}</strong>
-                            {% if product.subsidy > 0 %}
-                            <p style="color: #48bb78; font-size: 1.1rem; margin-top: 10px;">ISDE subsidie: €{{ product.subsidy|round(0)|int }}</p>
-                            {% else %}
+                            <h4>10 Zonnepanelen</h4>
+                            <p style="color: #666; margin: 10px 0;">Hoogrendement panelen van 425 Wp</p>
+                            <strong>€6.500</strong>
                             <p style="color: #2c5282; font-size: 1.1rem; margin-top: 10px;">Geen subsidie nodig</p>
-                            {% endif %}
                             <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
-                                <p style="color: #2c5282; font-weight: bold;">{{ product.impact }}</p>
-                                <p style="color: #666; font-size: 0.9rem;">{{ product.benefit }}</p>
+                                <p style="color: #2c5282; font-weight: bold;">3.380 kWh/jaar opwekking</p>
+                                <p style="color: #666; font-size: 0.9rem;">Direct besparen op stroomkosten</p>
                             </div>
                         </div>
-                        {% endfor %}
+                        <div class="package-item">
+                            <h4>1 Hybride Warmtepomp</h4>
+                            <p style="color: #666; margin: 10px 0;">Efficiënte Daikin Altherma 3H</p>
+                            <strong>€8.142</strong>
+                            <p style="color: #48bb78; font-size: 1.1rem; margin-top: 10px;">ISDE subsidie: €2.825</p>
+                            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
+                                <p style="color: #2c5282; font-weight: bold;">70% gasreductie</p>
+                                <p style="color: #666; font-size: 0.9rem;">Altijd warm, ook bij vorst</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div class="savings-banner">
                 <h3>Uw Totale Jaarlijkse Besparing</h3>
-                <div class="savings-amount">€{{ annual_savings|round(0)|int }}</div>
-                <p style="font-size: 1.5rem;">Dat is €{{ monthly_savings|round(0)|int }} per maand!</p>
+                <div class="savings-amount">€1.704</div>
+                <p style="font-size: 1.5rem;">Dat is €142 per maand!</p>
             </div>
         </section>
 
@@ -1761,7 +1767,11 @@
                 <h2 style="font-size: 2.5rem; color: #92400e; margin-bottom: 30px;">Wat betekent dit voor u?</h2>
                 <div class="savings-story" style="max-width: 800px; margin: 0 auto;">
                     <p style="font-size: 1.4rem; line-height: 1.8; color: #78350f; white-space: pre-line;">
-                        {{ personal_savings_story }}
+                        Met €142 per maand extra in uw portemonnee krijgt u direct meer financiële ruimte. Dit bedrag - €1.704 per jaar - blijft van nu af aan in uw eigen zak in plaats van naar de energieleverancier te gaan.
+
+                        Uw nieuwe hybride warmtepomp zorgt voor een stabiele, aangename temperatuur in huis. De moderne technologie past zich automatisch aan het weer aan, waardoor u altijd optimaal comfort heeft tegen de laagste kosten. Op koude winterdagen springt uw bestaande cv-ketel bij, dus u heeft altijd voldoende warmte.
+
+                        Met de 10 zonnepanelen op uw dak wekt u jaarlijks 3.380 kWh aan schone energie op. Dit dekt een groot deel van uw stroomverbruik, waardoor u minder afhankelijk wordt van het elektriciteitsnet en stijgende energieprijzen. U ziet letterlijk de meter terugdraaien op zonnige dagen!
                     </p>
                 </div>
             </div>
@@ -1779,28 +1789,28 @@
                 <div class="investment-grid">
                     <div class="investment-item">
                         <span>Totale investering</span>
-                        <span>€{{ total_investment|round(0)|int }}</span>
+                        <span>€14.642</span>
                     </div>
                     <div class="investment-item">
                         <span>ISDE subsidies</span>
-                        <span style="color: #48bb78;">-€{{ total_subsidies|round(0)|int }}</span>
+                        <span style="color: #48bb78;">-€2.825</span>
                     </div>
                     <div class="investment-item">
                         <span>Netto investering</span>
-                        <span>€{{ net_investment|round(0)|int }}</span>
+                        <span>€11.817</span>
                     </div>
                     <div style="grid-column: 1/-1; margin-top: 30px;">
                         <div class="investment-item">
-                            <span>Warmtefonds lening ({{ loan_interest }}% rente)</span>
-                            <span>€{{ monthly_payment|round(0)|int }}/maand</span>
+                            <span>Warmtefonds lening (4% rente)</span>
+                            <span>€108/maand</span>
                         </div>
                         <div class="investment-item">
                             <span>Maandelijkse besparing</span>
-                            <span style="color: #48bb78;">€{{ monthly_savings|round(0)|int }}/maand</span>
+                            <span style="color: #48bb78;">€142/maand</span>
                         </div>
                         <div class="investment-item">
                             <span>Netto voordeel per maand</span>
-                            <span style="color: #48bb78; font-size: 1.5rem;">+€{{ monthly_cashflow|round(0)|int }}/maand</span>
+                            <span style="color: #48bb78; font-size: 1.5rem;">+€34/maand</span>
                         </div>
                     </div>
                 </div>
@@ -1821,15 +1831,15 @@
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; max-width: 900px; margin: 0 auto;">
                         <div style="background: rgba(255, 255, 255, 0.85); padding: 40px 30px; border-radius: 20px; text-align: center; backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);">
                             <h4 style="color: #2c5282; margin-bottom: 20px; font-size: 1.2rem;">Terugverdientijd</h4>
-                            <p style="font-size: 3rem; font-weight: bold; color: #2c5282; margin: 0;">{{ payback_years }}</p>
+                            <p style="font-size: 3rem; font-weight: bold; color: #2c5282; margin: 0;">6,9</p>
                             <p style="color: #2c5282; font-size: 1.5rem; margin: 0;">jaar</p>
                             <p style="color: #666; font-size: 0.9rem; margin-top: 15px;">Met energieprijsstijging</p>
                         </div>
                         <div style="background: rgba(255, 255, 255, 0.85); padding: 40px 30px; border-radius: 20px; text-align: center; backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);">
                             <h4 style="color: #48bb78; margin-bottom: 20px; font-size: 1.2rem;">20-jaars rendement</h4>
-                            <p style="font-size: 3rem; font-weight: bold; color: #48bb78; margin: 0;">{{ roi_20_years }}%</p>
+                            <p style="font-size: 3rem; font-weight: bold; color: #48bb78; margin: 0;">189%</p>
                             <p style="color: #48bb78; font-size: 1.5rem; margin: 0;">winst</p>
-                            <p style="color: #666; font-size: 0.9rem; margin-top: 15px;">€{{ total_profit_20_years|round(0)|int }} totaal</p>
+                            <p style="color: #666; font-size: 0.9rem; margin-top: 15px;">€22.263 totaal</p>
                         </div>
                     </div>
                     <div style="margin-top: 40px; padding: 30px; background: rgba(255, 255, 255, 0.9); border-radius: 20px; text-align: center; max-width: 600px; margin-left: auto; margin-right: auto; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);">
@@ -1849,27 +1859,29 @@
                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; margin: 60px 0;">
                     <div>
                         <p style="font-size: 1rem; opacity: 0.9; margin-bottom: 10px;">Huidige waarde</p>
-                        <p style="font-size: 2.5rem; font-weight: bold;">€{{ property_value_current|round(0)|int }}</p>
+                        <p style="font-size: 2.5rem; font-weight: bold;">€340.000</p>
                     </div>
                     <div>
                         <p style="font-size: 1rem; opacity: 0.9; margin-bottom: 10px;">Waardestijging</p>
-                        <p style="font-size: 2.5rem; font-weight: bold; color: #48bb78;">+€{{ property_value_increase|round(0)|int }}</p>
+                        <p style="font-size: 2.5rem; font-weight: bold; color: #48bb78;">+€27.200</p>
                     </div>
                     <div>
                         <p style="font-size: 1rem; opacity: 0.9; margin-bottom: 10px;">Nieuwe waarde</p>
-                        <p style="font-size: 2.5rem; font-weight: bold;">€{{ property_value_after|round(0)|int }}</p>
+                        <p style="font-size: 2.5rem; font-weight: bold;">€367.200</p>
                     </div>
                 </div>
                 
                 <p style="font-size: 1.3rem; line-height: 1.8; margin: 40px auto; max-width: 600px;">
-                    De waardestijging van €{{ property_value_increase|round(0)|int }} is maar liefst {{ (property_value_increase / net_investment)|round(1) }}x hoger dan uw netto investering. 
+                    De waardestijging van €27.200 is maar liefst 2,3x hoger dan uw netto investering. 
                     Een energiezuinige woning is niet alleen comfortabeler, maar ook veel meer waard op de woningmarkt.
                 </p>
                 
                 <!-- Property Value Narrative -->
                 <div class="neighborhood-context" style="margin-top: 40px; padding: 30px; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 20px; border: 2px solid rgba(255,255,255,0.3);">
                     <p style="font-size: 1.2rem; line-height: 1.6; margin: 0;">
-                        {{ property_value_narrative }}
+                        In 's-Gravenhage is de vraag naar energiezuinige woningen sterk toegenomen. Kopers zijn bereid meer te betalen voor woningen met een beter energielabel, vooral in wijken met karakteristieke vooroorlogse woningen zoals de uwe. Een sprong van label D naar B maakt uw woning zeer aantrekkelijk voor toekomstige kopers.
+
+                        De Haagse woningmarkt waardeert duurzame investeringen steeds meer. Uw rijtjeswoning uit 1950 met moderne energiesystemen combineert het beste van twee werelden: authentieke charme met hedendaags comfort. Dit is precies wat veel huizenkopers zoeken. De waardestijging van 8% die u realiseert is gebaseerd op recente transacties van vergelijkbare woningen in uw buurt.
                     </p>
                 </div>
             </div>
@@ -1884,26 +1896,26 @@
             <div class="co2-impact">
                 <h3 style="font-size: 2rem; color: #2d3748; text-align: center; margin-bottom: 20px;">Uw Bijdrage aan een Beter Klimaat</h3>
                 <p style="text-align: center; font-size: 1.5rem; color: #48bb78; font-weight: bold;">
-                    CO₂ reductie: {{ co2_reduction|round(0)|int }} kg per jaar ({{ co2_reduction_pct }}%)
+                    CO₂ reductie: 2.377 kg per jaar (27%)
                 </p>
                 <p style="text-align: center; color: #666; margin-bottom: 40px;">
-                    Over 20 jaar bespaart u {{ (co2_reduction * 20)|round(0)|int }} kg CO₂
+                    Over 20 jaar bespaart u 47.540 kg CO₂
                 </p>
                 
                 <div class="co2-equivalents">
                     <div class="co2-item">
                         <div class="co2-icon">🌳</div>
-                        <h4 style="font-size: 2rem; color: #2d3748;">{{ co2_trees }} bomen</h4>
+                        <h4 style="font-size: 2rem; color: #2d3748;">119 bomen</h4>
                         <p style="color: #666;">geplant voor 10 jaar</p>
                     </div>
                     <div class="co2-item">
                         <div class="co2-icon">🚗</div>
-                        <h4 style="font-size: 2rem; color: #2d3748;">{{ co2_car_km|round(0)|int }} km</h4>
+                        <h4 style="font-size: 2rem; color: #2d3748;">11.885 km</h4>
                         <p style="color: #666;">minder autorijden</p>
                     </div>
                     <div class="co2-item">
                         <div class="co2-icon">✈️</div>
-                        <h4 style="font-size: 2rem; color: #2d3748;">{{ co2_flights }} vluchten</h4>
+                        <h4 style="font-size: 2rem; color: #2d3748;">14 vluchten</h4>
                         <p style="color: #666;">Amsterdam-Barcelona</p>
                     </div>
                 </div>
@@ -1935,12 +1947,12 @@
                 <div class="step-card">
                     <div class="step-number">1</div>
                     <h3 style="color: white; font-size: 1.5rem; margin-bottom: 15px;">Offerte Bespreken</h3>
-                    <p>We nemen alle details door met {{ advisor_name }} en beantwoorden al uw vragen</p>
+                    <p>We nemen alle details door met Sarah Janssen en beantwoorden al uw vragen</p>
                 </div>
                 <div class="step-card">
                     <div class="step-number">2</div>
                     <h3 style="color: white; font-size: 1.5rem; margin-bottom: 15px;">Warmtefonds</h3>
-                    <p>Regel zelf, snel en eenvoudig uw financiering tegen {{ loan_interest }}% rente bij het Warmtefonds</p>
+                    <p>Regel zelf, snel en eenvoudig uw financiering tegen 4% rente bij het Warmtefonds</p>
                 </div>
                 <div class="step-card">
                     <div class="step-number">3</div>
@@ -1951,7 +1963,7 @@
             
             <div style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); padding: 40px; border-radius: 20px; margin-top: 50px;">
                 <h3 style="color: white; margin-bottom: 20px;">Neem Contact Op</h3>
-                <p style="font-size: 1.2rem; margin-bottom: 10px;"><strong>{{ advisor_name }}</strong> - Uw Energieadviseur</p>
+                <p style="font-size: 1.2rem; margin-bottom: 10px;"><strong>Sarah Janssen</strong> - Uw Energieadviseur</p>
                 <p>📧 info@wattzo.nl</p>
                 <p>📞 +31 10 892 0160</p>
                 <p style="margin-top: 20px;">
