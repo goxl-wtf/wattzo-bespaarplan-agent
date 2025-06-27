@@ -1,101 +1,134 @@
-# Wattzo Bespaarplan Agent
+# Wattzo Bespaarplan Agent System
 
-AI-powered energy savings plan (Bespaarplan) generator using MCP servers for Dutch homeowners. Creates personalized sustainability reports with financial calculations and environmental impact.
+A production-ready fast-agent system that generates personalized energy savings plans (Bespaarplan) for customers, with CRM API integration and Supabase storage.
 
-## Overview
+## 🚀 Features
 
-This project consists of three MCP (Model Context Protocol) servers that work together to generate comprehensive energy savings plans:
+- **Automated Bespaarplan Generation**: Complete workflow from deal ID to finished HTML report
+- **Hybrid AI Model Strategy**: Uses Claude Sonnet 4 for complex tasks, Gemini 2.5 Flash for simple operations
+- **API Integration**: FastAPI endpoints for CRM system integration
+- **Cloud Storage**: Supabase bucket storage with CDN delivery for customer portal
+- **Quality Assurance**: Built-in evaluator-optimizer pattern ensures high-quality output
+- **Cost Optimized**: ~70% cheaper model usage while maintaining quality
+- **MCP Architecture**: Leverages existing MCP servers for data, calculations, and templates
 
-- **Energy Data Server**: Provides customer profiles, property information, and quote details
-- **Calculation Engine**: Performs financial calculations, energy savings projections, and environmental impact assessments
-- **Template Provider**: Serves HTML templates and enables dynamic content generation
+## 📋 Prerequisites
 
-## Features
+- Python 3.10+
+- Active MCP servers (energy-data, calculation-engine, template-provider)
+- Anthropic API key (for Claude Sonnet 4)
+- OpenRouter API key (for Gemini 2.5 Flash)
+- Supabase project with appropriate permissions
 
-- 🏠 Personalized energy savings calculations based on property characteristics
-- 💰 Detailed financial projections including ROI, payback period, and subsidy calculations
-- 🌱 Environmental impact assessment with CO2 reduction equivalents
-- 📊 Energy label improvement calculations with realistic constraints
-- 📄 Magazine-style HTML reports with dynamic content
-- 🎯 Customer profile-based personalization
+## 🛠️ Installation
 
-## Architecture
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/goxl-wtf/wattzo-bespaarplan-agent.git
+   cd wattzo-bespaarplan-agent
+   git checkout feature/fast-agent-bespaarplan-api
+   ```
+
+2. **Install dependencies**
+   ```bash
+   uv sync  # or: pip install -r requirements.txt
+   ```
+
+3. **Configure environment**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your API keys and configuration
+   ```
+
+4. **Run MCP servers** (in separate terminals)
+   ```bash
+   # Energy Data Server
+   cd mcp-servers/energy-data
+   python server.py
+
+   # Calculation Engine
+   cd mcp-servers/calculation-engine
+   python server.py
+
+   # Template Provider
+   cd mcp-servers/template-provider
+   python server.py
+   ```
+
+## 🚦 Quick Start
+
+### Test Generation (CLI)
+```bash
+# Test with a known working deal ID
+python test_generation.py
+```
+
+### Run API Server
+```bash
+# Start the API server
+python run_api.py
+
+# API will be available at:
+# - http://localhost:8000
+# - Docs: http://localhost:8000/docs
+# - ReDoc: http://localhost:8000/redoc
+```
+
+### Generate via API
+```bash
+# Generate a bespaarplan
+curl -X POST "http://localhost:8000/api/v1/generate-bespaarplan" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "deal_id": "2b3ddc42-72e8-4d92-85fb-6b1d5440f405",
+    "priority": "normal",
+    "notify_customer": true
+  }'
+```
+
+## 📁 Project Structure
+
+```
+wattzo-bespaarplan-agent/
+├── agents/               # Fast-agent implementations
+│   ├── main.py          # Main orchestrator and workflow
+│   └── storage/         # Supabase storage implementation
+├── api/                 # FastAPI application
+│   └── main.py          # API endpoints and handlers
+├── config/              # Configuration files
+├── tests/               # Test suites
+├── mcp-servers/         # MCP server implementations
+│   ├── energy-data/     # Customer and property data
+│   ├── calculation-engine/ # Financial calculations
+│   └── template-provider/  # HTML template generation
+├── fastagent.config.yaml # Fast-agent configuration
+└── .env.example         # Environment template
+```
+
+## 🏗️ Architecture
 
 ```
 ┌─────────────────┐     ┌──────────────────┐     ┌──────────────────┐
 │  Energy Data    │────▶│   Calculation    │────▶│    Template      │
-│     Server      │     │     Engine       │     │    Provider      │
+│   MCP Server    │     │  Engine MCP      │     │  Provider MCP    │
 └─────────────────┘     └──────────────────┘     └──────────────────┘
         │                        │                         │
         └────────────────────────┴─────────────────────────┘
                                  │
                          ┌───────▼────────┐
-                         │  Claude Agent  │
-                         │  (Orchestrator)│
+                         │  Fast-Agent    │
+                         │  Orchestrator  │
+                         └───────┬────────┘
+                                 │
+                         ┌───────▼────────┐
+                         │  FastAPI       │
+                         │  CRM Interface │
+                         └───────┬────────┘
+                                 │
+                         ┌───────▼────────┐
+                         │   Supabase     │
+                         │  Storage/DB    │
                          └────────────────┘
-```
-
-## Installation
-
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/wattzo-bespaarplan-agent.git
-cd wattzo-bespaarplan-agent
-```
-
-2. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-3. Set up environment variables:
-```bash
-cp .env.local.example .env.local
-# Edit .env.local with your configuration
-```
-
-## Usage
-
-### Running the MCP Servers
-
-Each server can be run independently:
-
-```bash
-# Energy Data Server
-cd mcp-servers/energy-data
-python server.py
-
-# Calculation Engine
-cd mcp-servers/calculation-engine
-python server.py
-
-# Template Provider
-cd mcp-servers/template-provider
-python server.py
-```
-
-### Generating a Bespaarplan
-
-Use Claude with the provided prompt:
-
-```bash
-claude chat --mcp energy-data,calculation-engine,template-provider < .claude/prompts/generate-bespaarplan.md
-```
-
-## Project Structure
-
-```
-wattzo-bespaarplan-agent/
-├── .claude/
-│   ├── prompts/           # Agent prompts
-│   └── CLAUDE.md          # Project-specific Claude instructions
-├── mcp-servers/
-│   ├── energy-data/       # Customer and property data server
-│   ├── calculation-engine/# Financial and energy calculations
-│   └── template-provider/ # HTML template generation
-├── README.md
-├── requirements.txt
-└── .env.local.example
 ```
 
 ## Key Components

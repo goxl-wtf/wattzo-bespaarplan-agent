@@ -1,0 +1,46 @@
+default_model: "claude-sonnet-4-20250514"
+execution_engine: "asyncio"
+
+# Model providers
+anthropic:
+  api_key: ${ANTHROPIC_API_KEY}
+
+openrouter:
+  api_key: ${OPENROUTER_API_KEY}
+  base_url: "https://openrouter.ai/api/v1"
+
+# MCP servers - using existing working servers
+mcp:
+  servers:
+    energy-data:
+      transport: "stdio"
+      command: "uv"
+      args: ["run", "python", "mcp-servers/energy-data/server.py"]
+      env:
+        DEMO_MODE: "false"
+        SUPABASE_URL: ${SUPABASE_URL}
+        SUPABASE_KEY: ${SUPABASE_KEY}
+    
+    calculation-engine:
+      transport: "stdio"
+      command: "uv" 
+      args: ["run", "python", "mcp-servers/calculation-engine/server.py"]
+      env:
+        DEMO_MODE: "false"
+        SUPABASE_URL: ${SUPABASE_URL}
+        SUPABASE_KEY: ${SUPABASE_KEY}
+    
+    template-provider:
+      transport: "stdio"
+      command: "uv"
+      args: ["run", "python", "mcp-servers/template-provider/server.py"]
+      env:
+        DEMO_MODE: "false"
+        SUPABASE_URL: ${SUPABASE_URL}
+        SUPABASE_KEY: ${SUPABASE_KEY}
+
+# Logging configuration
+logger:
+  type: "file"
+  level: "info"
+  path: "logs/fastagent.jsonl"
