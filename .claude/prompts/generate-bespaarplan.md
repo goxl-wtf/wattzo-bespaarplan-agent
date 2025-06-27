@@ -42,22 +42,22 @@ Generate personalized narratives based on customer profile and calculation resul
    Based on monthly savings amount AND customer profile:
    
    For cost_savings motivation:
-   - >€150/month: "Met €[amount] per maand bespaart u genoeg voor die jaarlijkse gezinsvakantie waar u van droomt."
-   - €100-150/month: "€[amount] per maand betekent extra financiële ruimte voor de leuke dingen in het leven."
-   - €50-100/month: "Met €[amount] per maand houdt u maandelijks een mooi bedrag over voor onverwachte uitgaven."
-   - <€50/month: "Elke euro telt - €[amount] per maand is een welkome aanvulling op uw budget."
+   - >€150/month: "Met €[amount] extra per maand heeft u aanzienlijk meer financiële ruimte voor wat u belangrijk vindt."
+   - €100-150/month: "€[amount] per maand betekent meer vrijheid in uw maandelijkse budget."
+   - €50-100/month: "Met €[amount] per maand bouwt u een comfortabele buffer op."
+   - <€50/month: "Ook €[amount] per maand maakt een verschil - het telt allemaal op."
    
    For comfort motivation:
-   - Focus on: "Deze investering betekent vooral geen koude voeten meer in de winter, een aangenaam koel huis in de zomer, en een constant comfortabel binnenklimaat."
+   - Focus on: "Deze investering staat voor optimaal wooncomfort het hele jaar door. De €[amount] die u maandelijks bespaart is een welkome bonus."
    
    For environment motivation:
-   - Focus on: "Uw bijdrage aan een duurzame toekomst is substantieel - vergelijkbaar met het planten van [trees] bomen elk jaar."
+   - Focus on: "U levert een concrete bijdrage aan een duurzamere wereld. De €[amount] maandelijkse besparing maakt deze keuze extra aantrekkelijk."
 
 3. **Property Value Narrative** (`property_value_narrative`):
    Based on value increase percentage:
-   - >10%: "Met een waardestijging van [percentage]% behoort uw woning straks tot de meest gewilde in de buurt. Een investering die zichzelf dubbel terugbetaalt."
-   - 5-10%: "Een waardestijging van [percentage]% maakt uw woning aantrekkelijker op de woningmarkt. Kopers waarderen energiezuinige woningen steeds meer."
-   - <5%: "Elke verbetering telt - de [percentage]% waardestijging is een mooie bonus bovenop alle andere voordelen."
+   - >10%: "Een waardestijging van [percentage]% is een uitstekend resultaat. Energiezuinige woningen zijn steeds meer in trek."
+   - 5-10%: "Met [percentage]% waardestijging investeert u niet alleen in comfort, maar ook in de waarde van uw woning."
+   - <5%: "Naast alle andere voordelen stijgt uw woning ook nog [percentage]% in waarde."
 
 4. **Urgency Context** (add to appropriate sections):
    Based on current date and market conditions:
@@ -75,10 +75,8 @@ Use the customer profile data to adjust tone and emphasis:
   - `skeptical`: Emphasize proven results and realistic projections
 
 - **lifeSituation**:
-  - `young_family`: "Een veilige, comfortabele omgeving voor uw kinderen"
-  - `empty_nesters`: "Geniet van uw welverdiende rust in optimaal comfort"
-  - `single_professional`: "Investeer slim in uw toekomst"
-  - `multi_generational`: "Comfort voor het hele gezin, van jong tot oud"
+  - Keep general - don't make specific assumptions about family composition
+  - Focus on the benefits that apply to everyone regardless of their situation
 
 **IMPORTANT: Dutch Number Formatting Rules**
 
@@ -182,19 +180,15 @@ When extracting `customer_lastname` from the full customer name:
   - "Lagere maandelijkse energiekosten voor meer financiële vrijheid"
   - "Een slimme investering met gegarandeerd rendement"
   - "Onafhankelijk worden van stijgende energieprijzen"
-  - Add specific wishes based on life situation:
-    - young_family: "Extra budget voor gezinsactiviteiten en kinderopvang"
-    - empty_nesters: "Meer geld overhouden voor reizen en hobby's"
-    - professional: "Maximaal rendement op mijn investering"
+  - Add ONE more general wish:
+    - "Meer financiële ruimte voor mijn persoonlijke prioriteiten"
   
   **For comfort motivation:**
   - "Geen koude voeten meer in de winter"
   - "Een constant aangename temperatuur in huis"
   - "Minder tocht en een gezonder binnenklimaat"
-  - Add specific wishes based on life situation:
-    - young_family: "Een veilige, warme omgeving voor de kinderen"
-    - empty_nesters: "Optimaal comfort tijdens de pensioenjaren"
-    - multi_generational: "Comfort voor alle generaties onder één dak"
+  - Add ONE more general wish:
+    - "Optimaal wooncomfort voor iedereen in huis"
   
   **For environment motivation:**
   - "Een concrete bijdrage leveren aan een duurzame toekomst"
@@ -217,8 +211,10 @@ When extracting `customer_lastname` from the full customer name:
 
 When filling the template, add these three narrative placeholders with the generated content:
 - `energy_situation_narrative`: The energy label improvement story
-- `personal_savings_story`: The personalized savings narrative
+- `personal_savings_story`: The personalized savings narrative (keep general, avoid specific assumptions)
 - `property_value_narrative`: The property value increase story
+
+**IMPORTANT**: When creating the personal_savings_story, combine the savings message with general benefits. Avoid specific examples like "sportclub voor de kinderen" or "jaarlijkse vakantie". Instead use phrases like "meer financiële ruimte", "extra budget voor uw prioriteiten", or "vrijheid om te kiezen".
 
 These narratives should be placed in the appropriate sections of the HTML template to create a more engaging, personalized report.
 

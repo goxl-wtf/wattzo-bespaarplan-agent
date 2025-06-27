@@ -543,92 +543,229 @@
             letter-spacing: -1px;
         }
         
-        /* Label improvement visual */
+        /* Label improvement visual - House-shaped design */
         .label-improvement {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 40px;
+            gap: 50px;
             margin: 60px 0;
-            padding: 40px;
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            padding: 60px 40px;
+            background: linear-gradient(135deg, rgba(248, 250, 252, 0.8) 0%, rgba(226, 232, 240, 0.8) 100%);
             border-radius: 24px;
-            font-size: 2rem;
-            font-weight: bold;
+            position: relative;
+            overflow: hidden;
         }
         
+        .label-improvement::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(44, 82, 130, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(72, 187, 120, 0.03) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        /* House-shaped energy label */
         .label-badge {
-            display: inline-block;
-            width: 140px;
-            height: 140px;
-            line-height: 140px;
-            border-radius: 20px;
-            color: white;
-            text-align: center;
-            font-size: 3.5rem;
-            font-weight: 700;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.25);
             position: relative;
-            background-size: cover;
-            transition: transform 0.3s ease;
+            width: 120px;
+            height: 140px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: drop-shadow(0 10px 30px rgba(0,0,0,0.1));
+            z-index: 1;
         }
         
         .label-badge:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            transform: translateY(-8px) scale(1.02);
+            filter: drop-shadow(0 15px 40px rgba(0,0,0,0.15));
         }
         
-        .label-badge::after {
-            content: 'energie-label';
+        /* House body */
+        .house-body {
             position: absolute;
-            bottom: -45px;
+            bottom: 0;
+            width: 100%;
+            height: 70%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, transparent 100%);
+            border-radius: 0 0 8px 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        /* House roof */
+        .house-roof {
+            position: absolute;
+            top: 0;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 0.9rem;
-            color: #2c5282;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-left: 60px solid transparent;
+            border-right: 60px solid transparent;
+            border-bottom: 42px solid;
+            transition: all 0.4s ease;
+        }
+        
+        /* Subtle roof line */
+        .house-roof::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: -60px;
+            width: 120px;
+            height: 2px;
+            background: rgba(255,255,255,0.3);
+        }
+        
+        /* Energy label letter */
+        .label-letter {
+            font-size: 48px;
+            font-weight: 300;
+            color: rgba(255,255,255,0.95);
+            font-family: 'Montserrat', sans-serif;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 2;
+            line-height: 1;
+            margin-top: 20px;
+        }
+        
+        /* Label description */
+        .label-badge::after {
+            content: 'ENERGIE LABEL';
+            position: absolute;
+            bottom: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            color: #4a5568;
+            font-weight: 500;
+            letter-spacing: 1.5px;
             white-space: nowrap;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
         
-        .label-d { 
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            border: 3px solid #dc2626;
+        /* Small efficiency indicator */
+        .efficiency-indicator {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 6px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(255,255,255,0.5);
         }
         
-        .label-c {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            border: 3px solid #d97706;
+        /* Refined color palette */
+        .label-d .house-roof { 
+            border-bottom-color: #E57373;
+        }
+        .label-d .house-body {
+            background-color: #EF5350;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);
         }
         
-        .label-b { 
-            background: linear-gradient(135deg, #22c55e, #16a34a);
-            border: 3px solid #16a34a;
+        .label-c .house-roof {
+            border-bottom-color: #FFB74D;
+        }
+        .label-c .house-body {
+            background-color: #FFA726;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);
         }
         
-        .label-a { 
-            background: linear-gradient(135deg, #22c55e, #16a34a);
-            border: 3px solid #16a34a;
+        .label-b .house-roof { 
+            border-bottom-color: #81C784;
+        }
+        .label-b .house-body {
+            background-color: #66BB6A;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);
         }
         
-        .label-a\+\+ {
-            background: linear-gradient(135deg, #059669, #047857);
-            border: 3px solid #047857;
+        .label-a .house-roof { 
+            border-bottom-color: #4DB6AC;
+        }
+        .label-a .house-body {
+            background-color: #26A69A;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);
         }
         
-        .arrow {
-            color: #2c5282;
-            font-size: 3rem;
-            animation: pulse 2s ease-in-out infinite;
+        .label-a\+\+ .house-roof {
+            border-bottom-color: #00897B;
+        }
+        .label-a\+\+ .house-body {
+            background-color: #00796B;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);
         }
         
-        @keyframes pulse {
+        /* Animated arrow with curved path */
+        .arrow-container {
+            position: relative;
+            width: 80px;
+            height: 60px;
+        }
+        
+        .arrow-path {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #2c5282 20%, #2c5282 80%, transparent);
+            opacity: 0.3;
+        }
+        
+        .arrow-head {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-left: 12px solid #2c5282;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            animation: arrowPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes arrowPulse {
             0%, 100% {
-                transform: translateX(0);
+                transform: translateY(-50%) translateX(0);
+                opacity: 0.6;
             }
             50% {
-                transform: translateX(10px);
+                transform: translateY(-50%) translateX(5px);
+                opacity: 1;
+            }
+        }
+        
+        /* Hover effect for house animation */
+        .label-badge:hover .house-roof {
+            transform: translateX(-50%) translateY(-3px);
+        }
+        
+        .label-badge:hover .efficiency-indicator {
+            animation: glow 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes glow {
+            0%, 100% {
+                box-shadow: 0 0 10px rgba(255,255,255,0.5);
+            }
+            50% {
+                box-shadow: 0 0 20px rgba(255,255,255,0.8);
             }
         }
         
@@ -946,31 +1083,60 @@
                 padding: 12px 10px;
             }
             
-            /* Label badges */
+            /* Label badges - mobile adjustments */
             .label-improvement {
-                gap: 20px;
+                gap: 30px;
                 margin: 40px 0;
-                padding: 30px 20px;
+                padding: 40px 20px;
             }
             
             .label-badge {
                 width: 90px;
-                height: 90px;
-                line-height: 90px;
-                font-size: 2.2rem;
-                border-radius: 12px;
-                border-width: 2px;
+                height: 105px;
+            }
+            
+            .house-roof {
+                border-left-width: 45px;
+                border-right-width: 45px;
+                border-bottom-width: 31px;
+            }
+            
+            .house-roof::after {
+                left: -45px;
+                width: 90px;
+            }
+            
+            .label-letter {
+                font-size: 36px;
+                margin-top: 15px;
             }
             
             .label-badge::after {
-                font-size: 0.75rem;
-                bottom: -35px;
-                letter-spacing: 0.5px;
-                color: #2c5282;
+                font-size: 9px;
+                bottom: -30px;
+                letter-spacing: 1px;
             }
             
-            .arrow {
-                font-size: 2rem;
+            .efficiency-indicator {
+                top: 37px;
+                width: 5px;
+                height: 5px;
+            }
+            
+            .arrow-container {
+                width: 50px;
+                height: 40px;
+            }
+            
+            .arrow-path {
+                width: 40px;
+            }
+            
+            .arrow-head {
+                right: 5px;
+                border-left-width: 10px;
+                border-top-width: 6px;
+                border-bottom-width: 6px;
             }
             
             /* Package showcase */
@@ -1375,9 +1541,24 @@
             </table>
 
             <div class="label-improvement">
-                <div class="label-badge label-{{ energy_label_current|lower }}">{{ energy_label_current }}</div>
-                <div class="arrow">→</div>
-                <div class="label-badge label-{{ energy_label_after|lower }}">{{ energy_label_after }}</div>
+                <div class="label-badge label-{{ energy_label_current|lower }}">
+                    <div class="house-roof"></div>
+                    <div class="house-body">
+                        <span class="label-letter">{{ energy_label_current }}</span>
+                    </div>
+                    <div class="efficiency-indicator"></div>
+                </div>
+                <div class="arrow-container">
+                    <div class="arrow-path"></div>
+                    <div class="arrow-head"></div>
+                </div>
+                <div class="label-badge label-{{ energy_label_after|lower }}">
+                    <div class="house-roof"></div>
+                    <div class="house-body">
+                        <span class="label-letter">{{ energy_label_after }}</span>
+                    </div>
+                    <div class="efficiency-indicator"></div>
+                </div>
             </div>
             
             <!-- Energy Situation Narrative -->
@@ -1428,12 +1609,25 @@
         </section>
 
         <!-- Personal Impact Section -->
-        <section class="personal-impact" style="padding: 60px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 24px; margin: 60px 0;">
-            <h2 style="font-size: 2rem; color: #92400e; margin-bottom: 30px; text-align: center;">Wat betekent dit voor u?</h2>
-            <div class="savings-story" style="max-width: 800px; margin: 0 auto;">
-                <p style="font-size: 1.4rem; line-height: 1.8; color: #78350f; text-align: center;">
-                    {{ personal_savings_story }}
-                </p>
+        <section class="personal-impact" style="position: relative; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 24px; margin: 60px 0; overflow: hidden;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; min-height: 400px;">
+                <!-- Text Content -->
+                <div style="padding: 60px 40px 60px 60px;">
+                    <h2 style="font-size: 2.5rem; color: #92400e; margin-bottom: 30px;">Wat betekent dit voor u?</h2>
+                    <div class="savings-story">
+                        <p style="font-size: 1.4rem; line-height: 1.8; color: #78350f;">
+                            {{ personal_savings_story }}
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Image Section -->
+                <div style="position: relative; height: 100%; min-height: 400px; overflow: hidden;">
+                    <img src="https://dlxxgvpebaeqmmqdiqtp.supabase.co/storage/v1/object/public/website-images//radiator-thermostat-heating-temperature-adjustmen.webp" 
+                         alt="Comfort en besparing" 
+                         style="position: absolute; top: 0; right: 0; width: 100%; height: 100%; object-fit: cover; object-position: center;">
+                    <div style="position: absolute; inset: 0; background: linear-gradient(to right, rgba(254, 243, 199, 0.8) 0%, transparent 50%);"></div>
+                </div>
             </div>
         </section>
 
@@ -1476,16 +1670,37 @@
                 </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; margin: 60px 0;">
-                <div style="background: linear-gradient(135deg, #e6f7ff, #f0f9ff); padding: 40px; border-radius: 20px; text-align: center;">
-                    <h4 style="color: #2c5282; margin-bottom: 20px;">Terugverdientijd</h4>
-                    <p style="font-size: 3rem; font-weight: bold; color: #2c5282;">{{ payback_years }} jaar</p>
-                    <p style="color: #666;">Met energieprijsstijging</p>
-                </div>
-                <div style="background: linear-gradient(135deg, #f0fdf4, #dcfce7); padding: 40px; border-radius: 20px; text-align: center;">
-                    <h4 style="color: #48bb78; margin-bottom: 20px;">20-jaars rendement</h4>
-                    <p style="font-size: 3rem; font-weight: bold; color: #48bb78;">{{ roi_20_years }}%</p>
-                    <p style="color: #666;">Totale winst: €{{ total_profit_20_years|round(0)|int }}</p>
+            <!-- Financial Metrics with Visual -->
+            <div style="position: relative; background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); border-radius: 24px; margin: 60px 0; overflow: hidden;">
+                <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; align-items: center;">
+                    <!-- Metrics -->
+                    <div style="padding: 60px;">
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px;">
+                            <div style="background: rgba(255, 255, 255, 0.8); padding: 30px; border-radius: 16px; text-align: center; backdrop-filter: blur(10px);">
+                                <h4 style="color: #2c5282; margin-bottom: 15px; font-size: 1.1rem;">Terugverdientijd</h4>
+                                <p style="font-size: 2.5rem; font-weight: bold; color: #2c5282;">{{ payback_years }} jaar</p>
+                                <p style="color: #666; font-size: 0.9rem;">Met energieprijsstijging</p>
+                            </div>
+                            <div style="background: rgba(255, 255, 255, 0.8); padding: 30px; border-radius: 16px; text-align: center; backdrop-filter: blur(10px);">
+                                <h4 style="color: #48bb78; margin-bottom: 15px; font-size: 1.1rem;">20-jaars rendement</h4>
+                                <p style="font-size: 2.5rem; font-weight: bold; color: #48bb78;">{{ roi_20_years }}%</p>
+                                <p style="color: #666; font-size: 0.9rem;">Winst: €{{ total_profit_20_years|round(0)|int }}</p>
+                            </div>
+                        </div>
+                        <div style="margin-top: 30px; padding: 25px; background: rgba(255, 255, 255, 0.9); border-radius: 16px; text-align: center;">
+                            <p style="font-size: 1.3rem; color: #1e40af; margin: 0;">
+                                <strong>Uw investering verdient zichzelf dubbel en dwars terug!</strong>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Image -->
+                    <div style="position: relative; height: 400px; overflow: hidden;">
+                        <img src="https://dlxxgvpebaeqmmqdiqtp.supabase.co/storage/v1/object/public/website-images//euro-banknotes-in-a-central-heating-radiator.webp" 
+                             alt="Financiële voordelen" 
+                             style="position: absolute; top: 0; right: 0; width: 100%; height: 100%; object-fit: cover; object-position: center;">
+                        <div style="position: absolute; inset: 0; background: linear-gradient(to right, rgba(224, 231, 255, 0.3) 0%, transparent 60%);"></div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -1555,6 +1770,20 @@
                         <h4 style="font-size: 2rem; color: #2d3748;">{{ co2_flights }} vluchten</h4>
                         <p style="color: #666;">Amsterdam-Barcelona</p>
                     </div>
+                </div>
+                
+                <!-- Environmental Impact Narrative -->
+                <div class="narrative-section" style="margin-top: 60px; padding: 40px; background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); border-radius: 20px; border-left: 5px solid #10b981;">
+                    <h3 style="font-size: 1.5rem; color: #064e3b; margin-bottom: 20px;">U Maakt Het Verschil</h3>
+                    <p style="font-size: 1.2rem; line-height: 1.8; color: #064e3b; margin-bottom: 20px;">
+                        Met deze beslissing draagt u bij aan een betere toekomst voor de generaties die nog komen. Uw keuze voor duurzame energie betekent dat u actief meewerkt aan het behalen van de Nederlandse klimaatdoelen voor 2050.
+                    </p>
+                    <p style="font-size: 1.2rem; line-height: 1.8; color: #064e3b; margin-bottom: 20px;">
+                        Nederland heeft zich gecommitteerd aan een CO₂-reductie van 95% in 2050. Elke woning die verduurzaamd wordt, elke kuub gas die bespaard wordt, en elk zonnepaneel dat geplaatst wordt, brengt ons dichter bij dit doel. U bent geen toeschouwer - u bent een actieve deelnemer in deze transitie.
+                    </p>
+                    <p style="font-size: 1.2rem; line-height: 1.8; color: #064e3b;">
+                        De overheid ondersteunt uw keuze met ISDE-subsidies en het Warmtefonds, omdat zij begrijpt hoe belangrijk uw bijdrage is. Deze financiële steun maakt het niet alleen mogelijk, maar ook rendabel om nu de stap te zetten. U bent onderdeel van een groeiende beweging van huiseigenaren die kiezen voor een duurzame toekomst - samen maken we het verschil.
+                    </p>
                 </div>
             </div>
         </section>
