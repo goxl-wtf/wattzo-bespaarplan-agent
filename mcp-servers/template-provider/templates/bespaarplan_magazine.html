@@ -1402,6 +1402,73 @@
             .scroll-indicator {
                 display: none;
             }
+            
+            /* Personal Impact Section - Mobile */
+            .personal-impact h2 {
+                font-size: 1.8rem !important;
+            }
+            
+            .personal-impact .savings-story p {
+                font-size: 1.1rem !important;
+            }
+            
+            .personal-impact > div {
+                padding: 40px 20px !important;
+            }
+            
+            /* Financial Section - Mobile */
+            .investment-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            /* Financial Metrics Cards - Mobile */
+            section > div:last-child > div > div {
+                padding: 40px 20px !important;
+            }
+            
+            /* Property Value Grid - Mobile */
+            .property-content > div:first-of-type {
+                grid-template-columns: 1fr !important;
+                gap: 20px !important;
+            }
+            
+            /* CO2 Equivalents - Mobile */
+            .co2-equivalents {
+                grid-template-columns: 1fr;
+            }
+            
+            /* Environmental Narrative - Mobile */
+            .narrative-section {
+                padding: 30px 20px !important;
+            }
+            
+            .narrative-section h3 {
+                font-size: 1.3rem !important;
+            }
+            
+            .narrative-section p {
+                font-size: 1.1rem !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            /* Very Small Mobile Adjustments */
+            .personal-impact h2 {
+                font-size: 1.5rem !important;
+            }
+            
+            .metric-value {
+                font-size: 2rem !important;
+            }
+            
+            .section-header h2 {
+                font-size: 1.5rem !important;
+            }
+            
+            /* Package Items - Small Mobile */
+            .package-items {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -1609,24 +1676,22 @@
         </section>
 
         <!-- Personal Impact Section -->
-        <section class="personal-impact" style="position: relative; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 24px; margin: 60px 0; overflow: hidden;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; min-height: 400px;">
-                <!-- Text Content -->
-                <div style="padding: 60px 40px 60px 60px;">
-                    <h2 style="font-size: 2.5rem; color: #92400e; margin-bottom: 30px;">Wat betekent dit voor u?</h2>
-                    <div class="savings-story">
-                        <p style="font-size: 1.4rem; line-height: 1.8; color: #78350f;">
-                            {{ personal_savings_story }}
-                        </p>
-                    </div>
-                </div>
-                
-                <!-- Image Section -->
-                <div style="position: relative; height: 100%; min-height: 400px; overflow: hidden;">
-                    <img src="https://dlxxgvpebaeqmmqdiqtp.supabase.co/storage/v1/object/public/website-images//radiator-thermostat-heating-temperature-adjustmen.webp" 
-                         alt="Comfort en besparing" 
-                         style="position: absolute; top: 0; right: 0; width: 100%; height: 100%; object-fit: cover; object-position: center;">
-                    <div style="position: absolute; inset: 0; background: linear-gradient(to right, rgba(254, 243, 199, 0.8) 0%, transparent 50%);"></div>
+        <section class="personal-impact" style="position: relative; border-radius: 24px; margin: 60px 0; overflow: hidden; min-height: 400px;">
+            <!-- Background Image -->
+            <div style="position: absolute; inset: 0; z-index: 0;">
+                <img src="https://dlxxgvpebaeqmmqdiqtp.supabase.co/storage/v1/object/public/website-images//radiator-thermostat-heating-temperature-adjustmen.webp" 
+                     alt="Comfort en besparing" 
+                     style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
+                <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(254, 243, 199, 0.85) 0%, rgba(253, 230, 138, 0.75) 100%);"></div>
+            </div>
+            
+            <!-- Content -->
+            <div style="position: relative; z-index: 1; padding: 60px 40px; text-align: center;">
+                <h2 style="font-size: 2.5rem; color: #92400e; margin-bottom: 30px;">Wat betekent dit voor u?</h2>
+                <div class="savings-story" style="max-width: 800px; margin: 0 auto;">
+                    <p style="font-size: 1.4rem; line-height: 1.8; color: #78350f;">
+                        {{ personal_savings_story }}
+                    </p>
                 </div>
             </div>
         </section>
@@ -1670,36 +1735,36 @@
                 </div>
             </div>
 
-            <!-- Financial Metrics with Visual -->
-            <div style="position: relative; background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); border-radius: 24px; margin: 60px 0; overflow: hidden;">
-                <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; align-items: center;">
-                    <!-- Metrics -->
-                    <div style="padding: 60px;">
-                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px;">
-                            <div style="background: rgba(255, 255, 255, 0.8); padding: 30px; border-radius: 16px; text-align: center; backdrop-filter: blur(10px);">
-                                <h4 style="color: #2c5282; margin-bottom: 15px; font-size: 1.1rem;">Terugverdientijd</h4>
-                                <p style="font-size: 2.5rem; font-weight: bold; color: #2c5282;">{{ payback_years }} jaar</p>
-                                <p style="color: #666; font-size: 0.9rem;">Met energieprijsstijging</p>
-                            </div>
-                            <div style="background: rgba(255, 255, 255, 0.8); padding: 30px; border-radius: 16px; text-align: center; backdrop-filter: blur(10px);">
-                                <h4 style="color: #48bb78; margin-bottom: 15px; font-size: 1.1rem;">20-jaars rendement</h4>
-                                <p style="font-size: 2.5rem; font-weight: bold; color: #48bb78;">{{ roi_20_years }}%</p>
-                                <p style="color: #666; font-size: 0.9rem;">Winst: €{{ total_profit_20_years|round(0)|int }}</p>
-                            </div>
+            <!-- Financial Metrics with Full Background -->
+            <div style="position: relative; border-radius: 24px; margin: 60px 0; overflow: hidden; min-height: 400px;">
+                <!-- Background Image -->
+                <div style="position: absolute; inset: 0; z-index: 0;">
+                    <img src="https://dlxxgvpebaeqmmqdiqtp.supabase.co/storage/v1/object/public/website-images//euro-banknotes-in-a-central-heating-radiator.webp" 
+                         alt="Financiële voordelen" 
+                         style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
+                    <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(224, 231, 255, 0.85) 0%, rgba(199, 210, 254, 0.8) 100%);"></div>
+                </div>
+                
+                <!-- Content -->
+                <div style="position: relative; z-index: 1; padding: 60px 40px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; max-width: 900px; margin: 0 auto;">
+                        <div style="background: rgba(255, 255, 255, 0.85); padding: 40px 30px; border-radius: 20px; text-align: center; backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);">
+                            <h4 style="color: #2c5282; margin-bottom: 20px; font-size: 1.2rem;">Terugverdientijd</h4>
+                            <p style="font-size: 3rem; font-weight: bold; color: #2c5282; margin: 0;">{{ payback_years }}</p>
+                            <p style="color: #2c5282; font-size: 1.5rem; margin: 0;">jaar</p>
+                            <p style="color: #666; font-size: 0.9rem; margin-top: 15px;">Met energieprijsstijging</p>
                         </div>
-                        <div style="margin-top: 30px; padding: 25px; background: rgba(255, 255, 255, 0.9); border-radius: 16px; text-align: center;">
-                            <p style="font-size: 1.3rem; color: #1e40af; margin: 0;">
-                                <strong>Uw investering verdient zichzelf dubbel en dwars terug!</strong>
-                            </p>
+                        <div style="background: rgba(255, 255, 255, 0.85); padding: 40px 30px; border-radius: 20px; text-align: center; backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);">
+                            <h4 style="color: #48bb78; margin-bottom: 20px; font-size: 1.2rem;">20-jaars rendement</h4>
+                            <p style="font-size: 3rem; font-weight: bold; color: #48bb78; margin: 0;">{{ roi_20_years }}%</p>
+                            <p style="color: #48bb78; font-size: 1.5rem; margin: 0;">winst</p>
+                            <p style="color: #666; font-size: 0.9rem; margin-top: 15px;">€{{ total_profit_20_years|round(0)|int }} totaal</p>
                         </div>
                     </div>
-                    
-                    <!-- Image -->
-                    <div style="position: relative; height: 400px; overflow: hidden;">
-                        <img src="https://dlxxgvpebaeqmmqdiqtp.supabase.co/storage/v1/object/public/website-images//euro-banknotes-in-a-central-heating-radiator.webp" 
-                             alt="Financiële voordelen" 
-                             style="position: absolute; top: 0; right: 0; width: 100%; height: 100%; object-fit: cover; object-position: center;">
-                        <div style="position: absolute; inset: 0; background: linear-gradient(to right, rgba(224, 231, 255, 0.3) 0%, transparent 60%);"></div>
+                    <div style="margin-top: 40px; padding: 30px; background: rgba(255, 255, 255, 0.9); border-radius: 20px; text-align: center; max-width: 600px; margin-left: auto; margin-right: auto; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);">
+                        <p style="font-size: 1.4rem; color: #1e40af; margin: 0; font-weight: 600;">
+                            Uw investering verdient zichzelf dubbel en dwars terug!
+                        </p>
                     </div>
                 </div>
             </div>
