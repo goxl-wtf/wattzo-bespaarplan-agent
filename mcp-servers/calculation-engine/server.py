@@ -1474,6 +1474,11 @@ def calculate_comprehensive_metrics_impl(
         'months_household': round(co2_reduction / 416, 1) if co2_reduction > 0 else 0  # Average Dutch home = 5000kg/year
     }
     
+    # Calculate customer's baseline CO2 emissions for accurate percentage
+    current_gas_co2 = energy_profile['current_usage']['gas'] * GAS_CO2_FACTOR
+    current_electricity_co2 = energy_profile['current_usage']['electricity'] * ELECTRICITY_CO2_FACTOR
+    baseline_co2 = current_gas_co2 + current_electricity_co2
+    
     # Determine effective payback period
     # Use inflation-adjusted payback for more realistic view
     effective_payback = basic_savings['financial_impact']['payback_years_with_inflation']
@@ -1530,7 +1535,7 @@ def calculate_comprehensive_metrics_impl(
             'payback_period': round(effective_payback, 1),
             'roi_20_years': round(basic_savings['financial_impact']['roi_20_years'] * 100, 0),  # As percentage
             'co2_reduction_annual': round(co2_reduction, 0),
-            'co2_reduction_percentage': round(co2_reduction / 8800 * 100, 0),  # % of Dutch average
+            'co2_reduction_percentage': round(co2_reduction / baseline_co2 * 100, 0) if baseline_co2 > 0 else 0,  # % of customer baseline
             'net_electricity_usage_kwh': basic_savings['financial_impact']['net_electricity_usage_kwh'],
             'net_metering_applied': True
         },
@@ -1585,10 +1590,10 @@ def calculate_from_comprehensive_data(comprehensive_data: Dict[str, Any]) -> Dic
         
         loan_terms = {
             'amount': comprehensive_data['quote']['totals']['net_investment'],
-            'interest_rate': loan_info.get('interest_rate', 0),  # Keep as-is from database (already decimal)
-            'term_years': loan_info.get('term_years', 15),  # Default 15 years
-            'monthly_payment': loan_info.get('monthly_payment', 0),  # Use pre-calculated if available
-            'income_category': loan_info.get('income_category', '>=60k')  # Default to higher income if not specified
+            'interest_rate': loan_info.get('interest_rate') if loan_info.get('interest_rate') is not None else 0,  # Keep as-is from database (already decimal)
+            'term_years': loan_info.get('term_years') if loan_info.get('term_years') is not None else 15,  # Default 15 years
+            'monthly_payment': loan_info.get('monthly_payment') if loan_info.get('monthly_payment') is not None else 0,  # Use pre-calculated if available
+            'income_category': loan_info.get('income_category') if loan_info.get('income_category') is not None else '>=60k'  # Default to higher income if not specified
         }
     
     # Calculate comprehensive metrics (skip DB lookup since we have all data)

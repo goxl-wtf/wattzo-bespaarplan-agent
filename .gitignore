@@ -162,5 +162,13 @@ Thumbs.db
 .claude/journal/
 .claude/scripts/
 
+# Generated bespaarplan files
+filled_bespaarplan_*.html
+temp_bespaarplan_*.html
+fill_template_*.py
+
+# Logs directory
+logs/
+
 # Keep example files
 !.env.local.example
