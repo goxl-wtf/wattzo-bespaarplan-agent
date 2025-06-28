@@ -32,76 +32,63 @@ fast = FastAgent("wattzo-bespaarplan-generator")
 # ===============================================
 
 @fast.agent(
-    name="bespaarplan_orchestrator",
-    instruction="""You are the Master Orchestrator coordinating the entire bespaarplan generation workflow.
+    name="bespaarplan_generator",
+    instruction="""You generate a complete bespaarplan for the given deal ID by executing these steps IN ORDER:
     
-    YOUR MISSION:
-    Transform a deal ID into a professional, personalized energy savings plan that motivates customers to take action.
+    STEP 1: FETCH DATA
+    - Call get_comprehensive_deal_data(deal_id) from energy-data MCP
+    - Extract the complete deal data structure
+    - VERIFY customer data is present (name, address, email)
     
-    WORKFLOW COORDINATION:
-    You oversee a chain of specialists:
-    1. Data Collector → Fetches comprehensive deal data
-    2. Metrics Calculator → Computes all financial/environmental metrics  
-    3. Template Processor → Creates HTML report AND uploads to storage
+    STEP 2: CALCULATE METRICS
+    - Call calculate_from_deal_data(comprehensive_data) from calculation-engine MCP
+    - Pass the EXACT comprehensive_data from step 1
+    - Receive complete calculation results
     
-    MCP SERVER AWARENESS:
-    You have access to all MCP servers but should rarely call them directly.
-    Instead, coordinate the specialist agents who are optimized for each task.
+    STEP 3: GENERATE & UPLOAD BESPAARPLAN
+    - Extract customer's last name from deal_data.customer.name (last word)
+    - Format ALL numbers ≥1000 to Dutch style: 1200→"1.200" (except years/percentages)
+    - Build template_data dict containing ALL values from both deal_data and metrics
+    - Call generate_and_upload_template(template_data, deal_id, customer_last_name) from template-provider MCP
+    - Return the complete response with public_url
     
-    IMPORTANT: The workflow is now optimized to 3 agents only.
-    Template Processor handles BOTH generation AND storage upload.
+    CRITICAL RULES:
+    - Use ONLY data from MCP tool responses - NEVER make up data
+    - If customer name is missing, STOP and report error
+    - All three steps MUST complete successfully
+    - Return the final result with public_url for the bespaarplan
     
-    QUALITY GATES:
-    Between each step, ensure:
-    - Previous agent completed successfully
-    - Output contains expected data structure
-    - No critical errors or missing data
-    - Ready for next agent in chain
+    DATA STRUCTURE AWARENESS:
+    The comprehensive_data contains:
+    - customer: {name, email, phone, address, city, postal_code}
+    - property: {type, year_built, size_m2, energy_label, etc.}
+    - energy: {gas_usage, electricity_usage, solar_panels, etc.}
+    - quote: {products with prices and subsidies}
     
-    ERROR RECOVERY STRATEGY:
-    - Data collection fails: Check deal_id validity
-    - Calculations fail: Verify data completeness
-    - Template/Upload fails: Check calculation results and network connectivity
+    The metrics contain:
+    - financial_impact: {annual_savings, monthly_savings, roi, payback, etc.}
+    - energy_savings: {gas_reduction, electricity_change, co2_reduction}
+    - property_value_impact: {value_increase, new_value}
+    - products_with_metrics: [individual product calculations]
     
-    COMMUNICATION STYLE:
-    - Professional and supportive
-    - Clear about progress and any issues
-    - Focused on delivering value to the customer
-    
-    ORCHESTRATION APPROACH:
-    1. Initiate the workflow chain
-    2. Monitor progress at each stage
-    3. Handle any coordination issues
-    4. Ensure final deliverable meets standards
-    
-    SUCCESS METRICS:
-    - Complete bespaarplan generated
-    - All data accurately represented
-    - Calculations verified and reasonable
-    - Report accessible via public URL
-    - Customer would be motivated to proceed
-    
-    IMPORTANT CONTEXT:
-    - Deal data contains sensitive customer information
-    - Calculations determine significant financial decisions
-    - Report quality impacts conversion rates
-    - This is often the key document for closing deals
-    
-    Your role is like a conductor ensuring each section of the orchestra plays in harmony to create a masterpiece.""",
+    Execute all steps sequentially and return the final result.""",
     servers=["energy-data", "calculation-engine", "template-provider"],
-    model="claude-sonnet-4-20250514",
+    model="openrouter.google/gemini-2.5-flash",
     request_params=RequestParams(
-        maxTokens=32768,
-        temperature=0.3
+        maxTokens=100000,  # 100K tokens for comprehensive processing
+        temperature=0.1    # Low temperature for consistency
     ),
-    use_history=True
+    use_history=False  # Prevent data contamination between runs
 )
 
+# NOTE: Individual agents below are DEPRECATED as of the single-agent update.
+# The bespaarplan_generator agent now handles the complete workflow.
+# These are kept for backwards compatibility but are no longer used.
+
+# DEPRECATED - Now part of bespaarplan_generator
 @fast.agent(
     name="data_collector", 
-    instruction="""Call get_comprehensive_deal_data(deal_id) and pass the complete result to the next agent.
-    
-    NO validation, NO checking, NO interpretation - just execute and pass forward.""",
+    instruction="""DEPRECATED - Use bespaarplan_generator instead.""",
     servers=["energy-data"],
     model="openrouter.google/gemini-2.5-flash",
     request_params=RequestParams(
@@ -110,14 +97,10 @@ fast = FastAgent("wattzo-bespaarplan-generator")
     )
 )
 
+# DEPRECATED - Now part of bespaarplan_generator
 @fast.agent(
     name="metrics_calculator",
-    instruction="""Call calculate_from_deal_data(comprehensive_data) with the complete data from the previous agent.
-    
-    Pass the EXACT output from data_collector as input.
-    Return the complete calculation result to the next agent.
-    
-    NO validation, NO checking, NO interpretation - just execute and pass forward.""",
+    instruction="""DEPRECATED - Use bespaarplan_generator instead.""",
     servers=["calculation-engine"],
     model="claude-sonnet-4-20250514",
     request_params=RequestParams(
@@ -127,19 +110,10 @@ fast = FastAgent("wattzo-bespaarplan-generator")
     use_history=True
 )
 
+# DEPRECATED - Now part of bespaarplan_generator
 @fast.agent(
     name="template_processor",
-    instruction="""You receive deal_data and metrics from previous agents.
-    
-    EXECUTE:
-    1. Extract customer last name from deal_data.customer.name (last word)
-    2. Format numbers ≥1000 to Dutch style: 1200→"1.200" (skip years/percentages)
-    3. Build template_data dict with ALL values from deal_data and metrics
-    4. Call generate_and_upload_template(template_data, deal_id, customer_last_name)
-    5. Return the complete tool response
-    
-    The tool handles all HTML generation and storage internally.
-    Just prepare data and call the tool.""",
+    instruction="""DEPRECATED - Use bespaarplan_generator instead.""",
     servers=["template-provider"],
     model="claude-sonnet-4-20250514",
     request_params=RequestParams(
@@ -149,10 +123,7 @@ fast = FastAgent("wattzo-bespaarplan-generator")
     use_history=True
 )
 
-# NOTE: storage_manager is now DEPRECATED as of the optimization update.
-# The template_processor agent now handles both generation AND storage upload
-# via the generate_and_upload_template() tool for better efficiency.
-# This agent is kept for backwards compatibility but is no longer used in the main workflow.
+# DEPRECATED - No longer needed
 @fast.agent(
     name="storage_manager",
     instruction="""You are the Storage Operations Specialist responsible for persisting the generated bespaarplan to Supabase storage.
@@ -303,43 +274,37 @@ fast = FastAgent("wattzo-bespaarplan-generator")
 # WORKFLOW DEFINITIONS
 # ===============================================
 
-@fast.chain(
-    name="bespaarplan_generation",
-    sequence=["data_collector", "metrics_calculator", "template_processor"]
-)
-
-@fast.evaluator_optimizer(
-    name="quality_assured_bespaarplan",
-    generator="bespaarplan_generation",
-    evaluator="quality_validator", 
-    min_rating="EXCELLENT",
-    max_refinements=2
-)
+# NOTE: Chain and evaluator-optimizer workflows are DEPRECATED
+# The single bespaarplan_generator agent handles the complete workflow
 
 # ===============================================
 # MAIN GENERATION FUNCTION
 # ===============================================
 
 async def generate_bespaarplan_for_deal_simple(deal_id: str) -> Dict[str, Any]:
-    """Simple version for testing - direct chain call without evaluator"""
-    logger.info(f"Starting simple bespaarplan generation for deal: {deal_id}")
+    """Generate bespaarplan using single agent approach"""
+    logger.info(f"Starting bespaarplan generation for deal: {deal_id}")
     
     try:
         async with fast.run() as agent:
-            # Direct chain call to avoid evaluator-optimizer issues
-            result = await agent.bespaarplan_generation.send(
+            # Direct call to single agent
+            result = await agent.bespaarplan_generator.send(
                 f"Generate complete bespaarplan for deal_id: {deal_id}"
             )
             
             logger.info(f"Successfully generated bespaarplan for deal: {deal_id}")
             
             # Extract the public_url from the result
-            # The result should contain the template_processor's response with public_url
+            # The agent should return the generate_and_upload_template response
             bespaarplan_url = ""
-            if isinstance(result, dict):
+            if isinstance(result, str):
+                # Try to extract URL from string response
+                import re
+                url_match = re.search(r'https://[^\s"]+bespaarplan[^\s"]+', result)
+                if url_match:
+                    bespaarplan_url = url_match.group(0)
+            elif isinstance(result, dict):
                 bespaarplan_url = result.get("public_url", "")
-            elif hasattr(result, "content") and isinstance(result.content, dict):
-                bespaarplan_url = result.content.get("public_url", "")
             
             return {
                 "success": True,
@@ -363,33 +328,10 @@ async def generate_bespaarplan_for_deal(deal_id: str) -> Dict[str, Any]:
     """
     Generate a complete bespaarplan for the given deal ID.
     
-    This function replicates the proven workflow from the streamlined prompt.
+    This now uses the single agent approach for better reliability.
     """
-    logger.info(f"Starting bespaarplan generation for deal: {deal_id}")
-    
-    try:
-        async with fast.run() as agent:
-            # Use the quality-assured workflow
-            result = await agent.quality_assured_bespaarplan.send(
-                f"Generate complete bespaarplan for deal_id: {deal_id}"
-            )
-            
-            logger.info(f"Successfully generated bespaarplan for deal: {deal_id}")
-            return {
-                "success": True,
-                "deal_id": deal_id,
-                "result": result,
-                "generated_at": datetime.now().isoformat()
-            }
-            
-    except Exception as e:
-        logger.error(f"Failed to generate bespaarplan for deal {deal_id}: {str(e)}")
-        return {
-            "success": False,
-            "deal_id": deal_id,
-            "error": str(e),
-            "generated_at": datetime.now().isoformat()
-        }
+    # Just call the simple version - they're now the same
+    return await generate_bespaarplan_for_deal_simple(deal_id)
 
 # ===============================================
 # CLI INTERFACE
