@@ -19,7 +19,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Import our agent system
-from agents.main import generate_bespaarplan_for_deal
+from agents.main import generate_bespaarplan_for_deal, generate_bespaarplan_for_deal_simple
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -129,7 +129,8 @@ async def generate_bespaarplan(
     
     try:
         # Generate the bespaarplan using our agent system
-        result = await generate_bespaarplan_for_deal(request.deal_id)
+        # Using simple version to avoid evaluator-optimizer issues
+        result = await generate_bespaarplan_for_deal_simple(request.deal_id)
         
         processing_time = (datetime.now() - start_time).total_seconds()
         

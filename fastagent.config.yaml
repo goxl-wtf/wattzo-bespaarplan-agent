@@ -1,5 +1,6 @@
 default_model: "claude-sonnet-4-20250514"
 execution_engine: "asyncio"
+streaming: true
 
 # Model providers
 anthropic:
@@ -8,6 +9,8 @@ anthropic:
 openrouter:
   api_key: ${OPENROUTER_API_KEY}
   base_url: "https://openrouter.ai/api/v1"
+
+# Model configurations should be set in code via RequestParams, not here
 
 # MCP servers - using existing working servers
 mcp:
@@ -38,6 +41,18 @@ mcp:
         DEMO_MODE: "false"
         SUPABASE_URL: ${SUPABASE_URL}
         SUPABASE_KEY: ${SUPABASE_KEY}
+        SUPABASE_SERVICE_KEY: ${SUPABASE_SERVICE_KEY}
+        BUCKET_NAME: ${BUCKET_NAME:-bespaarplan-reports}
+    
+    supabase-storage:
+      transport: "stdio"
+      command: "uv"
+      args: ["run", "python", "mcp-servers/supabase-storage/server.py"]
+      env:
+        DEMO_MODE: "false"
+        SUPABASE_URL: ${SUPABASE_URL}
+        SUPABASE_SERVICE_KEY: ${SUPABASE_SERVICE_KEY}
+        BUCKET_NAME: ${BUCKET_NAME:-bespaarplan-reports}
 
 # Logging configuration
 logger:

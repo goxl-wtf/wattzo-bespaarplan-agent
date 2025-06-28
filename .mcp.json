@@ -44,7 +44,26 @@
         "mcp-servers/template-provider/server.py"
       ],
       "env": {
-        "PYTHONPATH": "."
+        "PYTHONPATH": ".",
+        "DEMO_MODE": "false",
+        "SUPABASE_URL": "https://dlxxgvpebaeqmmqdiqtp.supabase.co",
+        "SUPABASE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRseHhndnBlYmFlcW1tcWRpcXRwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0Mzg3MjMzMiwiZXhwIjoyMDU5NDQ4MzMyfQ.73Hk_UQRvH08LSh6YlsFgtHnZkh0tA3X23wCuJCGrG0",
+        "SUPABASE_SERVICE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRseHhndnBlYmFlcW1tcWRpcXRwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0Mzg3MjMzMiwiZXhwIjoyMDU5NDQ4MzMyfQ.73Hk_UQRvH08LSh6YlsFgtHnZkh0tA3X23wCuJCGrG0",
+        "BUCKET_NAME": "bespaarplan-reports"
+      }
+    },
+    "supabase-storage": {
+      "type": "stdio",
+      "command": "python3",
+      "args": [
+        "mcp-servers/supabase-storage/server.py"
+      ],
+      "env": {
+        "PYTHONPATH": ".",
+        "DEMO_MODE": "false",
+        "SUPABASE_URL": "https://dlxxgvpebaeqmmqdiqtp.supabase.co",
+        "SUPABASE_SERVICE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRseHhndnBlYmFlcW1tcWRpcXRwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0Mzg3MjMzMiwiZXhwIjoyMDU5NDQ4MzMyfQ.73Hk_UQRvH08LSh6YlsFgtHnZkh0tA3X23wCuJCGrG0",
+        "BUCKET_NAME": "bespaarplan-reports"
       }
     }
   }

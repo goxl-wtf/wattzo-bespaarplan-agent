@@ -8,15 +8,36 @@ import os
 from typing import Dict, Any
 from pathlib import Path
 import uuid
+import httpx
+import asyncio
+from datetime import datetime
+import logging
 
 from fastmcp import FastMCP
+from supabase import create_client, Client
 
 # Initialize MCP server
 mcp = FastMCP("TemplateProvider")
 
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 # Get the directory where this server.py file is located
 SERVER_DIR = Path(__file__).parent
 TEMPLATES_DIR = SERVER_DIR / "templates"
+
+# Storage configuration
+DEMO_MODE = os.getenv("DEMO_MODE", "false").lower() == "true"
+SUPABASE_URL = os.getenv("SUPABASE_URL", "")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")
+SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "")
+BUCKET_NAME = os.getenv("BUCKET_NAME", "bespaarplan-reports")
+
+# Initialize Supabase client
+supabase: Client = None
+if not DEMO_MODE and SUPABASE_URL and SUPABASE_KEY:
+    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 
 def load_template(template_name: str) -> str:
@@ -449,6 +470,142 @@ def combine_template_sections(session_id: str, deal_id: str) -> Dict[str, Any]:
         return {
             "success": False,
             "error": f"Failed to combine sections: {str(e)}"
+        }
+
+
+@mcp.tool()
+async def generate_and_upload_template(template_data: Dict[str, Any], deal_id: str, customer_last_name: str) -> Dict[str, Any]:
+    """
+    Generate a filled bespaarplan template and upload it directly to Supabase storage.
+    
+    This combined tool eliminates the need to pass large HTML content through multiple agents,
+    significantly reducing token usage and improving performance.
+    
+    Args:
+        template_data: Complete data structure with all placeholders to fill
+        deal_id: The deal ID for file naming and database update
+        customer_last_name: Customer's last name for folder structure
+    
+    Returns:
+        Dict containing:
+        - success: bool
+        - public_url: The CDN URL for the uploaded file
+        - file_path: The storage path ({last_name}-{deal_id}/bespaarplan-{deal_id}.html)
+        - size_kb: File size in KB
+        - uploaded_at: Upload timestamp
+        - database_updated: Whether the database was updated successfully
+    """
+    try:
+        # Load the template
+        template_html = load_template("bespaarplan_magazine.html")
+        
+        # Fill the template with data
+        filled_html = template_html
+        for key, value in template_data.items():
+            placeholder = f"{{{{{key}}}}}"
+            filled_html = filled_html.replace(placeholder, str(value))
+        
+        # Log unfilled placeholders for debugging
+        import re
+        remaining_placeholders = re.findall(r'\{\{([^}]+)\}\}', filled_html)
+        if remaining_placeholders:
+            logger.warning(f"Unfilled placeholders found: {remaining_placeholders[:10]}")
+        
+        # Prepare file path
+        folder_name = f"{customer_last_name.lower()}-{deal_id}"
+        filename = f"bespaarplan-{deal_id}.html"
+        file_path = f"{folder_name}/{filename}"
+        
+        # Convert HTML to bytes
+        html_bytes = filled_html.encode('utf-8')
+        
+        if DEMO_MODE:
+            # Demo mode: save locally
+            outputs_dir = SERVER_DIR / "outputs"
+            outputs_dir.mkdir(exist_ok=True)
+            demo_file = outputs_dir / f"demo_{filename}"
+            with open(demo_file, 'w', encoding='utf-8') as f:
+                f.write(filled_html)
+            
+            return {
+                "success": True,
+                "public_url": f"demo://storage/{file_path}",
+                "file_path": file_path,
+                "size_kb": len(html_bytes) / 1024,
+                "uploaded_at": datetime.now().isoformat(),
+                "database_updated": True
+            }
+        
+        # Upload to Supabase storage
+        upload_url = f"{SUPABASE_URL}/storage/v1/object/{BUCKET_NAME}/{file_path}"
+        
+        headers = {
+            "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
+            "Content-Type": "text/html; charset=utf-8",
+            "x-upsert": "true"  # Create folders if they don't exist
+        }
+        
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                upload_url,
+                content=html_bytes,
+                headers=headers,
+                timeout=30.0
+            )
+            
+            if response.status_code not in [200, 201]:
+                logger.error(f"Upload failed: {response.status_code} - {response.text}")
+                return {
+                    "success": False,
+                    "error": f"Upload failed with status {response.status_code}: {response.text}"
+                }
+        
+        # Generate public URL
+        public_url = f"{SUPABASE_URL}/storage/v1/object/public/{BUCKET_NAME}/{file_path}"
+        
+        # Update database with bespaarplan info
+        database_updated = False
+        try:
+            if supabase:
+                update_data = {
+                    "bespaarplan_url": public_url,
+                    "bespaarplan_generated_at": datetime.now().isoformat(),
+                    "bespaarplan_status": "completed"
+                }
+                
+                response = supabase.table('deals') \
+                    .update(update_data) \
+                    .eq('id', deal_id) \
+                    .execute()
+                
+                database_updated = True
+        except Exception as db_error:
+            logger.error(f"Database update failed for deal {deal_id}: {str(db_error)}")
+            # Continue - upload succeeded even if DB update failed
+        
+        # Also save locally for reference
+        outputs_dir = SERVER_DIR / "outputs"
+        outputs_dir.mkdir(exist_ok=True)
+        local_file = outputs_dir / f"{filename}"
+        with open(local_file, 'w', encoding='utf-8') as f:
+            f.write(filled_html)
+        
+        return {
+            "success": True,
+            "deal_id": deal_id,
+            "public_url": public_url,
+            "file_path": file_path,
+            "filename": filename,
+            "size_kb": len(html_bytes) / 1024,
+            "uploaded_at": datetime.now().isoformat(),
+            "database_updated": database_updated
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to generate and upload template: {str(e)}")
+        return {
+            "success": False,
+            "error": f"Failed to generate and upload template: {str(e)}"
         }
 
 
