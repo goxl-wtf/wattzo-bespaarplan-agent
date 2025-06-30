@@ -170,5 +170,8 @@ fill_template_*.py
 # Logs directory
 logs/
 
+# FastAgent secrets
+fastagent.secrets.yaml
+
 # Keep example files
 !.env.local.example

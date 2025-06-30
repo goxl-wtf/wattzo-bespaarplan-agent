@@ -5,13 +5,14 @@ Provides HTML templates for report generation to avoid LLM token limits
 """
 
 import os
-from typing import Dict, Any
+from typing import Dict, Any, List
 from pathlib import Path
 import uuid
 import httpx
 import asyncio
 from datetime import datetime
 import logging
+from jinja2 import Environment, Template
 
 from fastmcp import FastMCP
 from supabase import create_client, Client
@@ -30,14 +31,31 @@ TEMPLATES_DIR = SERVER_DIR / "templates"
 # Storage configuration
 DEMO_MODE = os.getenv("DEMO_MODE", "false").lower() == "true"
 SUPABASE_URL = os.getenv("SUPABASE_URL", "")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")
 SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "")
-BUCKET_NAME = os.getenv("BUCKET_NAME", "bespaarplan-reports")
+# Always use the correct bucket name
+BUCKET_NAME = "bespaarplan-reports"
+
+# Fallback values if environment variables are not passed
+if not SUPABASE_URL:
+    SUPABASE_URL = "https://dlxxgvpebaeqmmqdiqtp.supabase.co"
+if not SUPABASE_SERVICE_KEY:
+    SUPABASE_SERVICE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRseHhndnBlYmFlcW1tcWRpcXRwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0Mzg3MjMzMiwiZXhwIjoyMDU5NDQ4MzMyfQ.73Hk_UQRvH08LSh6YlsFgtHnZkh0tA3X23wCuJCGrG0"
+
+# Debug logging
+logger.info(f"Environment variables received:")
+logger.info(f"DEMO_MODE: {DEMO_MODE}")
+logger.info(f"SUPABASE_URL present: {bool(SUPABASE_URL)} (length: {len(SUPABASE_URL)})")
+logger.info(f"SUPABASE_SERVICE_KEY present: {bool(SUPABASE_SERVICE_KEY)} (length: {len(SUPABASE_SERVICE_KEY)})")
+logger.info(f"BUCKET_NAME: {BUCKET_NAME}")
 
 # Initialize Supabase client
 supabase: Client = None
-if not DEMO_MODE and SUPABASE_URL and SUPABASE_KEY:
-    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+if not DEMO_MODE and SUPABASE_URL and SUPABASE_SERVICE_KEY:
+    supabase = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+    logger.info(f"Supabase client initialized. URL: {SUPABASE_URL[:30]}...")
+    logger.info(f"Bucket name: {BUCKET_NAME}")
+else:
+    logger.warning(f"Supabase client NOT initialized. DEMO_MODE={DEMO_MODE}, URL={bool(SUPABASE_URL)}, SERVICE_KEY={bool(SUPABASE_SERVICE_KEY)}")
 
 
 def load_template(template_name: str) -> str:
@@ -496,23 +514,49 @@ async def generate_and_upload_template(template_data: Dict[str, Any], deal_id: s
         - database_updated: Whether the database was updated successfully
     """
     try:
+        logger.info(f"Starting generate_and_upload_template for deal {deal_id}")
+        logger.info(f"Customer last name: {customer_last_name}")
+        logger.info(f"Template data keys: {list(template_data.keys())[:20]}...")  # Log first 20 keys
+        
         # Load the template
         template_html = load_template("bespaarplan_magazine.html")
+        logger.info(f"Template loaded, size: {len(template_html)} bytes")
         
-        # Fill the template with data
-        filled_html = template_html
-        for key, value in template_data.items():
-            placeholder = f"{{{{{key}}}}}"
-            filled_html = filled_html.replace(placeholder, str(value))
+        # Pass raw data to Jinja2 - keep numeric values for calculations
+        processed_data = dict(template_data)
         
-        # Log unfilled placeholders for debugging
-        import re
-        remaining_placeholders = re.findall(r'\{\{([^}]+)\}\}', filled_html)
-        if remaining_placeholders:
-            logger.warning(f"Unfilled placeholders found: {remaining_placeholders[:10]}")
+        # Use Jinja2 to properly render the template
+        try:
+            # Create custom filter for Dutch number formatting
+            def dutch_format(value):
+                """Format numbers with Dutch thousand separators (dots)"""
+                if isinstance(value, (int, float)):
+                    return f"{int(value):,}".replace(',', '.')
+                return value
+            
+            # Create Jinja2 environment with custom filter
+            env = Environment()
+            env.filters['dutch_format'] = dutch_format
+            
+            # Create template from environment
+            jinja_template = env.from_string(template_html)
+            filled_html = jinja_template.render(**processed_data)
+            logger.info("Template rendered successfully with Jinja2")
+        
+            # Log unfilled placeholders for debugging
+            import re
+            remaining_placeholders = re.findall(r'\{\{([^}]+)\}\}', filled_html)
+            if remaining_placeholders:
+                logger.warning(f"Unfilled placeholders found ({len(remaining_placeholders)}): {remaining_placeholders[:10]}")
+        except Exception as e:
+            logger.error(f"Jinja2 template rendering failed: {str(e)}")
+            return {
+                "success": False,
+                "error": f"Template rendering failed: {str(e)}"
+            }
         
         # Prepare file path
-        folder_name = f"{customer_last_name.lower()}-{deal_id}"
+        folder_name = f"{customer_last_name.lower().replace(' ', '-')}-{deal_id}"
         filename = f"bespaarplan-{deal_id}.html"
         file_path = f"{folder_name}/{filename}"
         
@@ -521,6 +565,7 @@ async def generate_and_upload_template(template_data: Dict[str, Any], deal_id: s
         
         if DEMO_MODE:
             # Demo mode: save locally
+            logger.info("Running in DEMO_MODE - saving locally")
             outputs_dir = SERVER_DIR / "outputs"
             outputs_dir.mkdir(exist_ok=True)
             demo_file = outputs_dir / f"demo_{filename}"
@@ -536,32 +581,61 @@ async def generate_and_upload_template(template_data: Dict[str, Any], deal_id: s
                 "database_updated": True
             }
         
+        # Check if we have required credentials
+        if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
+            logger.error(f"Missing credentials: URL={bool(SUPABASE_URL)}, SERVICE_KEY={bool(SUPABASE_SERVICE_KEY)}")
+            return {
+                "success": False,
+                "error": f"Missing Supabase credentials"
+            }
+        
         # Upload to Supabase storage
         upload_url = f"{SUPABASE_URL}/storage/v1/object/{BUCKET_NAME}/{file_path}"
+        logger.info(f"Upload URL: {upload_url}")
+        logger.info(f"File size: {len(html_bytes)} bytes")
+        logger.info(f"Auth header length: {len(SUPABASE_SERVICE_KEY)}")
+        logger.info(f"SUPABASE_URL: {SUPABASE_URL}")
+        logger.info(f"BUCKET_NAME: {BUCKET_NAME}")
         
         headers = {
             "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
-            "Content-Type": "text/html; charset=utf-8",
+            "Content-Type": "text/html",  # Simplified mime type
             "x-upsert": "true"  # Create folders if they don't exist
         }
         
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                upload_url,
-                content=html_bytes,
-                headers=headers,
-                timeout=30.0
-            )
+        logger.info("Uploading to Supabase storage...")
+        logger.info(f"Full upload URL: {upload_url}")
+        logger.info(f"Headers (excluding auth): Content-Type={headers.get('Content-Type')}, x-upsert={headers.get('x-upsert')}")
+        
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    upload_url,
+                    content=html_bytes,
+                    headers=headers,
+                    timeout=30.0
+                )
+            
+            logger.info(f"Upload response status: {response.status_code}")
+            logger.info(f"Response headers: {dict(response.headers)}")
             
             if response.status_code not in [200, 201]:
                 logger.error(f"Upload failed: {response.status_code} - {response.text}")
+                logger.error(f"Failed URL was: {upload_url}")
                 return {
                     "success": False,
                     "error": f"Upload failed with status {response.status_code}: {response.text}"
                 }
+        except Exception as e:
+            logger.error(f"Upload exception: {type(e).__name__}: {str(e)}")
+            return {
+                "success": False,
+                "error": f"Upload exception: {str(e)}"
+            }
         
         # Generate public URL
         public_url = f"{SUPABASE_URL}/storage/v1/object/public/{BUCKET_NAME}/{file_path}"
+        logger.info(f"Upload successful! Public URL: {public_url}")
         
         # Update database with bespaarplan info
         database_updated = False
@@ -573,12 +647,16 @@ async def generate_and_upload_template(template_data: Dict[str, Any], deal_id: s
                     "bespaarplan_status": "completed"
                 }
                 
+                logger.info(f"Updating database for deal {deal_id}")
                 response = supabase.table('deals') \
                     .update(update_data) \
                     .eq('id', deal_id) \
                     .execute()
                 
                 database_updated = True
+                logger.info(f"Database updated successfully for deal {deal_id}")
+            else:
+                logger.warning("Supabase client not available for database update")
         except Exception as db_error:
             logger.error(f"Database update failed for deal {deal_id}: {str(db_error)}")
             # Continue - upload succeeded even if DB update failed
@@ -590,7 +668,8 @@ async def generate_and_upload_template(template_data: Dict[str, Any], deal_id: s
         with open(local_file, 'w', encoding='utf-8') as f:
             f.write(filled_html)
         
-        return {
+        logger.info(f"Template generation complete for deal {deal_id}")
+        result = {
             "success": True,
             "deal_id": deal_id,
             "public_url": public_url,
@@ -600,9 +679,11 @@ async def generate_and_upload_template(template_data: Dict[str, Any], deal_id: s
             "uploaded_at": datetime.now().isoformat(),
             "database_updated": database_updated
         }
+        logger.info(f"Returning result: {result}")
+        return result
         
     except Exception as e:
-        logger.error(f"Failed to generate and upload template: {str(e)}")
+        logger.error(f"Failed to generate and upload template: {str(e)}", exc_info=True)
         return {
             "success": False,
             "error": f"Failed to generate and upload template: {str(e)}"

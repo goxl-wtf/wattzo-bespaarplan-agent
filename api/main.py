@@ -130,7 +130,7 @@ async def generate_bespaarplan(
     try:
         # Generate the bespaarplan using our agent system
         # Using simple version to avoid evaluator-optimizer issues
-        result = await generate_bespaarplan_for_deal_simple(request.deal_id)
+        result = generate_bespaarplan_for_deal_simple(request.deal_id)
         
         processing_time = (datetime.now() - start_time).total_seconds()
         
@@ -154,7 +154,7 @@ async def generate_bespaarplan(
                 deal_id=request.deal_id,
                 bespaarplan_url=bespaarplan_url,
                 status="completed",
-                generated_at=result["generated_at"],
+                generated_at=datetime.now().isoformat(),
                 processing_time_seconds=processing_time
             )
         else:
@@ -164,7 +164,7 @@ async def generate_bespaarplan(
                 success=False,
                 deal_id=request.deal_id,
                 status="failed",
-                generated_at=result["generated_at"],
+                generated_at=datetime.now().isoformat(),
                 processing_time_seconds=processing_time,
                 error=result.get("error", "Unknown error occurred")
             )
