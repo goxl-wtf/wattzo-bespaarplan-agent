@@ -37,17 +37,22 @@ if __name__ == "__main__":
     # Import and run the API
     import uvicorn
     
-    port = int(os.getenv("API_PORT", 8000))
+    # IMPORTANT: Use PORT env var for Render, fallback to API_PORT or 8000
+    port = int(os.getenv("PORT", os.getenv("API_PORT", 8000)))
+    
+    # Detect if running in production (Render sets RENDER env var)
+    is_production = os.getenv("RENDER") is not None
     
     print(f"🚀 Starting Wattzo Bespaarplan API on port {port}")
-    print(f"📚 API Documentation: http://localhost:{port}/docs")
-    print(f"📖 Alternative docs: http://localhost:{port}/redoc")
+    if not is_production:
+        print(f"📚 API Documentation: http://localhost:{port}/docs")
+        print(f"📖 Alternative docs: http://localhost:{port}/redoc")
     print("\nPress CTRL+C to stop the server")
     
     uvicorn.run(
         "api.main:app",
-        host="0.0.0.0",
+        host="0.0.0.0",  # Required for Docker/container environments
         port=port,
-        reload=True,
+        reload=not is_production,  # Disable reload in production
         log_level="info"
     )

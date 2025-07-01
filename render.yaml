@@ -1,0 +1,36 @@
+services:
+  - type: web
+    name: wattzo-bespaarplan-api
+    runtime: docker
+    region: frankfurt  # Choose region close to your users (frankfurt for EU)
+    plan: free  # Start with free tier, upgrade as needed
+    
+    # Health check configuration
+    healthCheckPath: /health
+    
+    # Environment variables (set values in Render dashboard)
+    envVars:
+      # API Keys - Set these in Render dashboard for security
+      - key: ANTHROPIC_API_KEY
+        sync: false  # Manual entry required
+      - key: OPENROUTER_API_KEY
+        sync: false  # Manual entry required
+      - key: SUPABASE_URL
+        sync: false  # Manual entry required
+      - key: SUPABASE_SERVICE_KEY
+        sync: false  # Manual entry required
+      
+      # Configuration values
+      - key: BUCKET_NAME
+        value: bespaarplan-reports
+      - key: DEMO_MODE
+        value: "false"
+      - key: PYTHON_UNBUFFERED
+        value: "1"  # Ensures logs appear immediately
+      - key: FASTAGENT_CONFIG
+        value: "fastagent.config.render.yaml"  # Use production config
+      
+    # Auto-deploy settings
+    autoDeploy: false  # Set to true after testing
+    
+    # Build and start commands are defined in Dockerfile

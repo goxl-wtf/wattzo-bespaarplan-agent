@@ -17,8 +17,17 @@ def create_fast_agent() -> FastAgent:
     Create and configure the FastAgent instance.
     This should be called once during application startup.
     """
+    import os
+    
+    # Use production config if specified
+    config_path = os.getenv("FASTAGENT_CONFIG")
+    
     # Initialize FastAgent instance with parse_cli_args=False for API integration
-    fast = FastAgent("wattzo-bespaarplan-generator", parse_cli_args=False)
+    fast = FastAgent(
+        "wattzo-bespaarplan-generator", 
+        config_path=config_path,
+        parse_cli_args=False
+    )
     
     # Define the agent on the instance before returning
     _define_bespaarplan_agent(fast)
