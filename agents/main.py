@@ -12,12 +12,25 @@ from mcp_agent import RequestParams
 
 logger = logging.getLogger(__name__)
 
-# Initialize FastAgent instance
-fast = FastAgent("wattzo-bespaarplan-generator")
+def create_fast_agent() -> FastAgent:
+    """
+    Create and configure the FastAgent instance.
+    This should be called once during application startup.
+    """
+    # Initialize FastAgent instance with parse_cli_args=False for API integration
+    fast = FastAgent("wattzo-bespaarplan-generator", parse_cli_args=False)
+    
+    # Define the agent on the instance before returning
+    _define_bespaarplan_agent(fast)
+    
+    return fast
 
-# Single agent approach: One powerful agent that does everything
-@fast.agent(
-    name="bespaarplan_generator",
+def _define_bespaarplan_agent(fast: FastAgent):
+    """Define the bespaarplan generator agent on the FastAgent instance."""
+    
+    # Single agent approach: One powerful agent that does everything
+    @fast.agent(
+        name="bespaarplan_generator",
     instruction="""YOU MUST COMPLETE ALL 3 STEPS BELOW. DO NOT STOP UNTIL ALL STEPS ARE DONE.
 
     === STEP 1 OF 3: FETCH DATA ===
@@ -173,13 +186,17 @@ fast = FastAgent("wattzo-bespaarplan-generator")
     ),
     use_history=False  # Prevent data contamination between runs
 )
+    async def _agent_function():
+        # This function is needed for the decorator but not used directly
+        pass
 
 
-async def generate_bespaarplan_for_deal(deal_id: str) -> Dict[str, Any]:
+async def generate_bespaarplan_with_agent(agent_app, deal_id: str) -> Dict[str, Any]:
     """
-    Generate a complete bespaarplan for a specific deal using the single agent approach.
+    Generate a complete bespaarplan for a specific deal using the provided agent instance.
     
     Args:
+        agent_app: The initialized AgentApp instance from FastAgent
         deal_id: The unique identifier of the deal
         
     Returns:
@@ -188,16 +205,25 @@ async def generate_bespaarplan_for_deal(deal_id: str) -> Dict[str, Any]:
     logger.info(f"Starting bespaarplan generation for deal: {deal_id}")
     
     try:
-        # Use the FastAgent to run the agent
-        async with fast.run() as agent:
-            result = await agent.bespaarplan_generator.send(
-                f"Generate complete bespaarplan for deal_id: {deal_id}"
-            )
+        # Use the provided agent instance (already initialized)
+        result = await agent_app.bespaarplan_generator.send(
+            f"Generate complete bespaarplan for deal_id: {deal_id}"
+        )
+        
+        # Extract the public URL from the result if it's a string response
+        if isinstance(result, str):
+            # Try to parse the URL from the response
+            import re
+            url_match = re.search(r'https://[^\s]+\.html', result)
+            bespaarplan_url = url_match.group(0) if url_match else ""
+        else:
+            bespaarplan_url = result.get("public_url", "") if isinstance(result, dict) else ""
         
         logger.info(f"Bespaarplan generation completed for deal: {deal_id}")
         return {
             "success": True,
             "deal_id": deal_id,
+            "bespaarplan_url": bespaarplan_url,
             "result": result
         }
         
@@ -209,42 +235,5 @@ async def generate_bespaarplan_for_deal(deal_id: str) -> Dict[str, Any]:
             "error": str(e)
         }
 
-
-# Simplified synchronous wrapper that bypasses evaluation/optimization
-def generate_bespaarplan_for_deal_simple(deal_id: str) -> Dict[str, Any]:
-    """
-    Synchronous wrapper for simple bespaarplan generation.
-    This bypasses the evaluator-optimizer workflow for direct generation.
-    
-    Args:
-        deal_id: The unique identifier of the deal
-        
-    Returns:
-        Dict containing the result of the bespaarplan generation
-    """
-    import asyncio
-    
-    logger.info(f"Starting bespaarplan generation for deal: {deal_id}")
-    
-    try:
-        # Get or create event loop
-        try:
-            loop = asyncio.get_running_loop()
-            # If we're already in a loop, we need to run in a thread
-            import concurrent.futures
-            with concurrent.futures.ThreadPoolExecutor() as executor:
-                future = executor.submit(asyncio.run, generate_bespaarplan_for_deal(deal_id))
-                result = future.result()
-        except RuntimeError:
-            # No running loop, we can use asyncio.run directly
-            result = asyncio.run(generate_bespaarplan_for_deal(deal_id))
-        
-        return result
-        
-    except Exception as e:
-        logger.error(f"Failed to generate bespaarplan for deal {deal_id}: {str(e)}", exc_info=True)
-        return {
-            "success": False,
-            "deal_id": deal_id,
-            "error": str(e)
-        }
+# Note: The old synchronous wrapper and standalone generation functions have been removed.
+# The API now uses a single FastAgent instance initialized at startup.

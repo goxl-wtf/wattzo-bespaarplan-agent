@@ -2,6 +2,6 @@
 Wattzo Bespaarplan Agent System
 """
 
-from .main import generate_bespaarplan_for_deal, generate_bespaarplan_for_deal_simple, fast
+from .main import create_fast_agent, generate_bespaarplan_with_agent
 
-__all__ = ['generate_bespaarplan_for_deal', 'generate_bespaarplan_for_deal_simple', 'fast']
+__all__ = ['create_fast_agent', 'generate_bespaarplan_with_agent']

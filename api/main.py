@@ -5,6 +5,7 @@ FastAPI implementation for CRM integration with Bespaarplan generation
 import asyncio
 import logging
 import os
+from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Dict, Optional
 
@@ -19,19 +20,51 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Import our agent system
-from agents.main import generate_bespaarplan_for_deal, generate_bespaarplan_for_deal_simple
+from agents.main import create_fast_agent, generate_bespaarplan_with_agent
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# FastAPI app
+# Global agent instance
+agent_app = None
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Manage the lifecycle of the FastAgent instance.
+    This ensures MCP servers are initialized once and kept alive.
+    """
+    global agent_app
+    logger.info("Starting FastAgent lifecycle...")
+    
+    try:
+        # Create and initialize the FastAgent
+        fast_agent = create_fast_agent()
+        
+        # Run the agent and keep it alive
+        async with fast_agent.run() as agent:
+            agent_app = agent
+            logger.info("FastAgent initialized successfully with MCP servers")
+            
+            # Yield control back to FastAPI
+            yield
+            
+    except Exception as e:
+        logger.error(f"Failed to initialize FastAgent: {str(e)}")
+        raise
+    finally:
+        logger.info("Shutting down FastAgent...")
+        agent_app = None
+
+# FastAPI app with lifespan
 app = FastAPI(
     title="Wattzo Bespaarplan Generation API",
     description="API for generating personalized energy savings plans (Bespaarplan) for customers",
     version="1.0.0",
     docs_url="/docs",
-    redoc_url="/redoc"
+    redoc_url="/redoc",
+    lifespan=lifespan
 )
 
 # CORS middleware for frontend integration
@@ -94,12 +127,15 @@ async def root():
 @app.get("/health", tags=["Health"])
 async def health_check():
     """Detailed health check."""
+    agent_status = "available" if agent_app is not None else "not_initialized"
+    mcp_status = "connected" if agent_app is not None else "disconnected"
+    
     return {
-        "status": "healthy",
+        "status": "healthy" if agent_app is not None else "degraded",
         "services": {
-            "fast_agent": "available",
-            "mcp_servers": "connected",
-            "database": "connected"
+            "fast_agent": agent_status,
+            "mcp_servers": mcp_status,
+            "database": "connected"  # TODO: Implement actual DB check
         },
         "timestamp": datetime.now().isoformat()
     }
@@ -127,16 +163,21 @@ async def generate_bespaarplan(
     start_time = datetime.now()
     logger.info(f"Received bespaarplan generation request for deal: {request.deal_id}")
     
+    if agent_app is None:
+        logger.error("FastAgent not initialized - cannot generate bespaarplan")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Service temporarily unavailable - agent not initialized"
+        )
+    
     try:
         # Generate the bespaarplan using our agent system
-        # Using simple version to avoid evaluator-optimizer issues
-        result = generate_bespaarplan_for_deal_simple(request.deal_id)
+        result = await generate_bespaarplan_with_agent(agent_app, request.deal_id)
         
         processing_time = (datetime.now() - start_time).total_seconds()
         
         if result["success"]:
             # Extract the bespaarplan URL from the result
-            # This will be populated by the storage_manager agent
             bespaarplan_url = result.get("bespaarplan_url", "")
             
             # Background task for customer notification if requested
@@ -172,7 +213,7 @@ async def generate_bespaarplan(
     except Exception as e:
         processing_time = (datetime.now() - start_time).total_seconds()
         error_msg = f"Unexpected error during generation: {str(e)}"
-        logger.error(f"Generation failed for deal {request.deal_id}: {error_msg}")
+        logger.error(f"Generation failed for deal {request.deal_id}: {error_msg}", exc_info=True)
         
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -300,21 +341,7 @@ async def general_exception_handler(request, exc):
         }
     )
 
-# ===============================================
-# STARTUP/SHUTDOWN EVENTS
-# ===============================================
-
-@app.on_event("startup")
-async def startup_event():
-    """Initialize services on startup."""
-    logger.info("Starting Wattzo Bespaarplan API...")
-    # TODO: Initialize MCP connections, database pools, etc.
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Clean up on shutdown."""
-    logger.info("Shutting down Wattzo Bespaarplan API...")
-    # TODO: Close MCP connections, database pools, etc.
+# Note: Startup/shutdown logic is now handled by the lifespan context manager
 
 # ===============================================
 # MAIN ENTRY POINT
